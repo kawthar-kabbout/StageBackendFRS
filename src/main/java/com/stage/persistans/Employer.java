@@ -1,6 +1,8 @@
 package com.stage.persistans;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.util.Collection;
@@ -20,9 +22,12 @@ public class Employer {
     @NonNull
     @Column(nullable = false)
     private String firstName;
-    @Column(nullable = false)
     @NonNull
-    private int phone;
+    private String lastName;
+    @Column(unique = true, nullable = false)
+    @NonNull
+
+    private String phone;
     @NonNull
     @Column(nullable = false)
     private String address;

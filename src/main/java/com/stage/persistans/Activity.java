@@ -1,6 +1,9 @@
 package com.stage.persistans;
 
+import com.stage.persistans.enums.StatutActivity;
+import com.stage.persistans.enums.TypeActivity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -19,6 +22,7 @@ public class Activity {
     private Long id;
 
     @NonNull
+    @NotBlank
     @Column(unique = true, nullable = false)
     private String name;
 
@@ -36,7 +40,6 @@ public class Activity {
     @NonNull
     @ManyToOne
     private Project project;
-
 
 
     private LocalDateTime plannedStartDate;

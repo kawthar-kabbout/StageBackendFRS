@@ -1,8 +1,8 @@
 package com.stage.dto;
 
 import com.stage.persistans.Activity;
-import com.stage.persistans.StatutActivity;
-import com.stage.persistans.TypeActivity;
+import com.stage.persistans.enums.StatutActivity;
+import com.stage.persistans.enums.TypeActivity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

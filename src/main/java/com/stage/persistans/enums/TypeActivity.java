@@ -1,4 +1,4 @@
-package com.stage.persistans;
+package com.stage.persistans.enums;
 
 public enum TypeActivity {
     INTERNALISATION,  // Tâche réalisée en interne

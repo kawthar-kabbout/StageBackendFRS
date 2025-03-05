@@ -29,5 +29,5 @@ public class DependanceActivity {
     @NonNull
     @ManyToOne
     private Project project;
-
+    
 }

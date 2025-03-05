@@ -1,6 +1,6 @@
 package com.stage.services;
 
-import com.stage.persistans.DependencyType;
+import com.stage.persistans.enums.DependencyType;
 import com.stage.persistans.DependanceActivity;
 import com.stage.persistans.Activity;
 import com.stage.repositories.DependanceActivityRepository;

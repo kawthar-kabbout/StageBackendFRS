@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface ActivityRepository extends JpaRepository<Activity,Long> {
     Optional<Activity> findByName(String nom);
-    long countByProjectId(Long projectId);
+    Long countByProjectId(Long projectId);
     List<Activity> findByProject_Id(Long id);
 
     List<Activity> findByProjectIdAndParentActivityIsNull(Long projectId);

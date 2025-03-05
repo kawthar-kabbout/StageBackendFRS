@@ -3,8 +3,8 @@ package com.stage.services;
 
 import com.stage.dto.ActivityDTO;
 import com.stage.persistans.Activity;
-import com.stage.persistans.StatutActivity;
-import com.stage.persistans.TypeActivity;
+import com.stage.persistans.enums.StatutActivity;
+import com.stage.persistans.enums.TypeActivity;
 import com.stage.repositories.ActivityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

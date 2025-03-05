@@ -1,6 +1,6 @@
 package com.stage.controller;
 
-import com.stage.persistans.DependencyType;
+import com.stage.persistans.enums.DependencyType;
 import com.stage.persistans.DependanceActivity;
 import com.stage.services.DependanceActivityService;
 import com.stage.services.ActivityService;

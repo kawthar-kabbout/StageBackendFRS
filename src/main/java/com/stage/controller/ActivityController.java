@@ -2,9 +2,10 @@ package com.stage.controller;
 
 import com.stage.dto.ActivityDTO;
 import com.stage.persistans.Activity;
-import com.stage.persistans.StatutActivity;
-import com.stage.persistans.TypeActivity;
+import com.stage.persistans.enums.StatutActivity;
+import com.stage.persistans.enums.TypeActivity;
 import com.stage.services.ActivityService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class ActivityController {
 
 
     @PostMapping
-    public ResponseEntity<Activity> createActivity(@RequestBody Activity activity) {
+    public ResponseEntity<Activity> createActivity(@RequestBody @Valid Activity activity) {
         Activity createdModeleActivity = activityService.createModeleActivity(activity);
         return ResponseEntity.ok(createdModeleActivity);
     }

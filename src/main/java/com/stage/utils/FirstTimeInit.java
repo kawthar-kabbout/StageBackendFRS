@@ -2,8 +2,8 @@ package com.stage.utils;
 
 import com.stage.persistans.Activity;
 import com.stage.persistans.Project;
-import com.stage.persistans.StatutActivity;
-import com.stage.persistans.TypeActivity;
+import com.stage.persistans.enums.StatutActivity;
+import com.stage.persistans.enums.TypeActivity;
 import com.stage.repositories.ActivityRepository;
 import com.stage.repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
