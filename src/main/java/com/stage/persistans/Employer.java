@@ -31,7 +31,9 @@ public class Employer {
     @NonNull
     @Column(nullable = false)
     private String address;
-
+    @NonNull
+    @ManyToMany
+    private List<Skill>skills;
     @NonNull
     @ManyToMany
     private List<Activity> activities;

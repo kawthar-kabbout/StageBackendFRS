@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Getter
@@ -41,6 +42,8 @@ public class Activity {
     @ManyToOne
     private Project project;
 
+        @ManyToMany
+        private List<Skill> skills;
 
     private LocalDateTime plannedStartDate;
     private LocalDateTime effectiveStartDate;

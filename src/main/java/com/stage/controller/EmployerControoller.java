@@ -42,8 +42,8 @@ public class EmployerControoller {
             existingEmployer.setLastName(employerDetails.getLastName());
             existingEmployer.setPhone(employerDetails.getPhone());
             existingEmployer.setAddress(employerDetails.getAddress());
-
-
+            existingEmployer.setActivities(employerDetails.getActivities());
+            existingEmployer.setSkills(employerDetails.getSkills());
             Employer updatedEmployer = employerService.save(existingEmployer);
 
             return new ResponseEntity<>(updatedEmployer, HttpStatus.OK);
@@ -72,10 +72,4 @@ public ResponseEntity<Employer> deleteEmployer(@PathVariable("id") Long id) {
 
 
 
-    // Fonction pour récupérer le nombre d'activités d'un employé
-    @GetMapping("/{id}/activities/count")
-    public ResponseEntity<Integer> getActivityCount(@PathVariable Long id) {
-        int count = employerService.getActivityCountByEmployerId(id);
-        return ResponseEntity.ok(count);
-    }
 }
