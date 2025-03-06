@@ -3,7 +3,7 @@ package com.stage.utils;
 import com.stage.persistans.Activity;
 import com.stage.persistans.Project;
 import com.stage.persistans.enums.StatutActivity;
-import com.stage.persistans.enums.TypeActivity;
+import com.stage.persistans.enums.ActivityType;
 import com.stage.repositories.ActivityRepository;
 import com.stage.repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class FirstTimeInit implements CommandLineRunner {
             activity1 = new Activity(
                     "Activité 1",
                     StatutActivity.Cancel,
-                    TypeActivity.EXTERNE,
+                    ActivityType.EXTERNE,
                     p1,
                     LocalDateTime.of(2025, 3, 1, 9, 0), // Date de début prévue
                     LocalDateTime.of(2025, 3, 1, 17, 0) // Date de fin prévue
@@ -54,7 +54,7 @@ public class FirstTimeInit implements CommandLineRunner {
             activity2 = new Activity(
                     "Activité 2",
                     StatutActivity.Pending,
-                    TypeActivity.EXTERNE,
+                    ActivityType.EXTERNE,
 p2,
                     LocalDateTime.of(2025, 3, 2, 9, 0), // Date de début prévue
                     LocalDateTime.of(2025, 3, 2, 17, 0) // Date de fin prévue

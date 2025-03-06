@@ -1,7 +1,7 @@
 package com.stage.persistans;
 
 import com.stage.persistans.enums.StatutActivity;
-import com.stage.persistans.enums.TypeActivity;
+import com.stage.persistans.enums.ActivityType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -33,7 +33,7 @@ public class Activity {
     @NonNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TypeActivity typeActivity;
+    private ActivityType typeActivity;
 
     @ManyToOne
     private Activity parentActivity;
@@ -52,7 +52,7 @@ public class Activity {
     private LocalDateTime effectiveEndDate;
 
     public Activity(@NonNull String name,
-                    StatutActivity statut, @NonNull TypeActivity typeActivity,
+                    StatutActivity statut, @NonNull ActivityType typeActivity,
                     @NonNull Project project, LocalDateTime plannedStartDate,
                     LocalDateTime plannedEndDate) {
         this.name = name;

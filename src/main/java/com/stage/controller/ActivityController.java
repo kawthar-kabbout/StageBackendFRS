@@ -3,7 +3,7 @@ package com.stage.controller;
 import com.stage.dto.ActivityDTO;
 import com.stage.persistans.Activity;
 import com.stage.persistans.enums.StatutActivity;
-import com.stage.persistans.enums.TypeActivity;
+import com.stage.persistans.enums.ActivityType;
 import com.stage.services.ActivityService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +83,7 @@ public class ActivityController {
     }
 
     @GetMapping("/types")
-    public ResponseEntity<List<TypeActivity>> getTypeActivities() {
+    public ResponseEntity<List<ActivityType>> getTypeActivities() {
         return ResponseEntity.ok(activityService.getTypes());
     }
 

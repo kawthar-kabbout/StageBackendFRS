@@ -1,6 +1,7 @@
 package com.stage.controller;
 
 import com.stage.persistans.Machine;
+import com.stage.persistans.enums.MachineType;
 import com.stage.services.MachineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/machiens")
+@RequestMapping("/api/machines")
 @RequiredArgsConstructor
 public class MachineController {
 
@@ -37,5 +38,9 @@ public class MachineController {
     public ResponseEntity<Machine> createMachine(@RequestBody Machine machine) {
         machineService.save(machine);
         return ResponseEntity.ok(machine);
+    }
+    @GetMapping("/machienType")
+    public ResponseEntity<List<MachineType>> getMachineTypes() {
+        return ResponseEntity.ok(machineService.getTypes());
     }
 }

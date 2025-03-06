@@ -2,7 +2,7 @@ package com.stage.dto;
 
 import com.stage.persistans.Activity;
 import com.stage.persistans.enums.StatutActivity;
-import com.stage.persistans.enums.TypeActivity;
+import com.stage.persistans.enums.ActivityType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,7 @@ public class ActivityDTO {
     private Long id;
     private String nom;
     private StatutActivity statutActivity;
-    private TypeActivity typeActivity;
+    private ActivityType typeActivity;
     private Long parentActivityId;
     private Long projectId;
     private LocalDateTime dateFinPrevue;

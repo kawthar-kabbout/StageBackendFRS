@@ -4,7 +4,7 @@ package com.stage.services;
 import com.stage.dto.ActivityDTO;
 import com.stage.persistans.Activity;
 import com.stage.persistans.enums.StatutActivity;
-import com.stage.persistans.enums.TypeActivity;
+import com.stage.persistans.enums.ActivityType;
 import com.stage.repositories.ActivityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,8 +23,8 @@ public class ActivityService {
     public List<StatutActivity>getStatutActivities(){
         return   Arrays.asList(StatutActivity.values());
     }
-    public List<TypeActivity> getTypes() {
-        return Arrays.asList(TypeActivity.values());
+    public List<ActivityType> getTypes() {
+        return Arrays.asList(ActivityType.values());
     }
 public List<Activity> getActivitiesByProjectId(Long projectId) {
         return activityRepository.findByProject_Id(projectId);

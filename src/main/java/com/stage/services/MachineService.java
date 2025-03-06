@@ -2,10 +2,13 @@ package com.stage.services;
 
 
 import com.stage.persistans.Machine;
+import com.stage.persistans.enums.ActivityType;
+import com.stage.persistans.enums.MachineType;
 import com.stage.repositories.MachineRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +52,9 @@ public class MachineService {
             return null;
         }
     }
-
+    public List<MachineType> getTypes() {
+        return Arrays.asList(MachineType.values());
+    }
 
 
 }
