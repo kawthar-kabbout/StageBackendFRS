@@ -1,5 +1,6 @@
 package com.stage.services;
 
+import com.stage.persistans.Activity;
 import com.stage.persistans.Employer;
 import com.stage.repositories.EmployerRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,4 +50,18 @@ public class EmployerService {
          return null;
         }
     }
+
+
+    // Fonction pour récupérer le nombre d'activités d'un employé
+
+    public int getActivityCountByEmployerId(Long employerId) {
+        Optional<Employer> emp = employerRepository.findById(employerId);
+        if (emp.isPresent()) {
+            Employer employer = emp.get();
+            List<Activity> activities = employer.getActivities();
+            return (activities != null) ? activities.size() : 0;
+        }
+        return 0;
+    }
+
 }

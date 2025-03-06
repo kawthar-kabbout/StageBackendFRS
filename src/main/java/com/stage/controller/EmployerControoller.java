@@ -70,4 +70,12 @@ public ResponseEntity<Employer> deleteEmployer(@PathVariable("id") Long id) {
         }return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
 }
 
+
+
+    // Fonction pour récupérer le nombre d'activités d'un employé
+    @GetMapping("/{id}/activities/count")
+    public ResponseEntity<Integer> getActivityCount(@PathVariable Long id) {
+        int count = employerService.getActivityCountByEmployerId(id);
+        return ResponseEntity.ok(count);
+    }
 }

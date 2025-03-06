@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/modele-dependanceactivities")
+@RequestMapping("/api/dependanceactivities")
 public class DependanceActivityController {
     private final DependanceActivityService dependanceActivityService;
     private final ActivityService modeledActivityService;
