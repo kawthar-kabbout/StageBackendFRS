@@ -24,10 +24,7 @@ public class EmployerService {
 
 
     public Employer save(Employer employer) {
-        if (employer == null) {
-            throw new IllegalArgumentException("Employer must not be null");
-        }
-        return employerRepository.save(employer);
+       return employerRepository.save(employer);
     }
 
     public Employer update(Employer employer) {
@@ -43,7 +40,7 @@ public class EmployerService {
         }
         employerRepository.delete(employer);
     }
-
+    ////Pour afficher la liste des employés assignés à cette activité.
     public List<Employer> findByActivities_Id(Long id) {
         List<Employer> employers= employerRepository.findByActivities_Id((id));
         if (!employers.isEmpty()) {

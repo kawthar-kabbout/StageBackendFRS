@@ -33,7 +33,7 @@ public class Employer {
     private String address;
 
     @NonNull
-    @OneToMany
+    @ManyToMany
     private List<Activity> activities;
 
 

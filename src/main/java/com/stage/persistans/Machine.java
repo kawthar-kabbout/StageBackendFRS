@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Collection;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -25,7 +27,7 @@ public class Machine {
     private Boolean status  =true;
 
     @OneToMany
-    private Collection<Activity> activities;
+    private List<Activity> activities;
 
 
 }
