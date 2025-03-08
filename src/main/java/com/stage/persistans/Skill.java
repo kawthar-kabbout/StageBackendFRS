@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "name")
 @ToString
+
 @Entity
 public class Skill {
     @Id
@@ -24,4 +25,9 @@ public class Skill {
     @NotBlank
     @Column(nullable = false)
     private String description;
+
+    public Skill(@NonNull String name, @NonNull String description) {
+        this.name = name;
+        this.description = description;
+    }
 }

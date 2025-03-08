@@ -34,8 +34,10 @@ public class Machine {
     @NonNull
     private Boolean status  =true;
 
-    @OneToMany
+    @ManyToMany
     private List<Activity> activities;
+    @ManyToMany
+    private List<Skill> skills;
 
 
 }

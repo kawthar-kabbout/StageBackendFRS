@@ -4,6 +4,7 @@ import com.stage.persistans.enums.StatutActivity;
 import com.stage.persistans.enums.ActivityType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ public class Activity {
     @Enumerated(EnumType.STRING)
     private StatutActivity statut;
 
-    @NonNull
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ActivityType typeActivity;
@@ -41,7 +42,7 @@ public class Activity {
     @NonNull
     @ManyToOne
     private Project project;
-
+    @NotEmpty(message = "L'activité doit contenir au moins une compétence")
         @ManyToMany
         private List<Skill> skills;
 
@@ -51,15 +52,10 @@ public class Activity {
     private LocalDateTime plannedEndDate;
     private LocalDateTime effectiveEndDate;
 
-    public Activity(@NonNull String name,
-                    StatutActivity statut, @NonNull ActivityType typeActivity,
-                    @NonNull Project project, LocalDateTime plannedStartDate,
-                    LocalDateTime plannedEndDate) {
+    public Activity(@NonNull String name, @NonNull ActivityType typeActivity, @NonNull Project project, List<Skill> skills) {
         this.name = name;
-        this.statut = statut;
         this.typeActivity = typeActivity;
         this.project = project;
-        this.plannedStartDate = plannedStartDate;
-        this.plannedEndDate = plannedEndDate;
+        this.skills = skills;
     }
 }

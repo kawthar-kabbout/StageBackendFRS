@@ -43,7 +43,8 @@ public class SkillController {
     @PutMapping("/{id}")
     public ResponseEntity<Skill> updateSkill(@RequestBody Skill skill, @PathVariable Long id) {
         if (skillService.findSkillById(id).isPresent()) {
-            Skill savedSkill = skillService.createSkill(skill);
+            Skill savedSkill = skillService.updateSkill(id , skill);
+
             return new ResponseEntity<>(savedSkill, HttpStatus.OK);
         } return ResponseEntity.notFound().build();
     }

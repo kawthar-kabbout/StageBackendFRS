@@ -44,14 +44,22 @@ public class MachineService {
        }
     }
 
-
-    public Machine update(Machine machine ) {
-        if (machineRepository.findById(machine.getId()).isPresent()) {
-            return machineRepository.save(machine);
-        } else {
-            return null;
-        }
+    public Machine update(Long id, Machine machine) {
+      if(machineRepository.findById(id).isPresent()) {
+          Machine m=machineRepository.findById(id).get();
+          m.setName(machine.getName());
+          m.setSerialNumber(machine.getSerialNumber());
+          m.setMachineType(machine.getMachineType());
+          m.setSkills(machine.getSkills());
+          m.setActivities(machine.getActivities());
+          m.setStatus(machine.getStatus());
+          m.setMarque(machine.getMarque());
+          machineRepository.save(m);
+          return m;
+      }else
+          return null;
     }
+
     public List<MachineType> getTypes() {
         return Arrays.asList(MachineType.values());
     }
