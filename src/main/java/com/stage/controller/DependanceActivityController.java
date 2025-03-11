@@ -1,22 +1,26 @@
 package com.stage.controller;
 
+import com.stage.dto.DependanceActivityDTO;
+import com.stage.persistans.Activity;
 import com.stage.persistans.enums.DependencyType;
 import com.stage.persistans.DependanceActivity;
+import com.stage.repositories.DependanceActivityRepository;
 import com.stage.services.DependanceActivityService;
 import com.stage.services.ActivityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/dependanceactivities")
 public class DependanceActivityController {
     private final DependanceActivityService dependanceActivityService;
-    private final ActivityService modeledActivityService;
+    private final ActivityService activityService;
+
+
 
     @GetMapping
 
@@ -58,5 +62,13 @@ public class DependanceActivityController {
     }
 
 
+    @GetMapping("/dependanceActDTO/{id}")
+   public ResponseEntity<DependanceActivityDTO> getModelDependanceActivityDTO(@PathVariable Long id) {
 
-}
+        if (activityService.getActivityById(id).isPresent()) {
+            Activity a = activityService.getActivityById(id).get();
+            DependanceActivityDTO dependanceActivityDTO = dependanceActivityService.convertToDTO(a);
+            return ResponseEntity.ok(dependanceActivityDTO);
+        }return ResponseEntity.notFound().build();
+    }
+    }
