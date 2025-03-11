@@ -1,5 +1,7 @@
 package com.stage.services;
 
+import com.stage.persistans.Activity;
+import com.stage.persistans.Employer;
 import com.stage.persistans.Skill;
 import com.stage.repositories.SkillRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +16,16 @@ import java.util.Optional;
 public class SkillService {
     private final SkillRepository skillRepository;
 
-   public Skill createSkill(Skill skill) {
+   public Skill save(Skill skill) {
+
        return skillRepository.save(skill);
    }
    public List<Skill> findAllSkills() {
+
        return skillRepository.findAll();
    }
    public Optional<Skill> findSkillById(Long id) {
+
        return skillRepository.findById(id);
    }
 
@@ -36,5 +41,13 @@ public class SkillService {
           return null;
 
    }
+
+ /*  public boolean checkSkillEmployerActivity(Employer employer, Activity activity ) {
+       if (employer.getSkills().equals(activity.getSkills())) {
+           return true;
+       }
+       return false;
+   }
+*/
 
 }

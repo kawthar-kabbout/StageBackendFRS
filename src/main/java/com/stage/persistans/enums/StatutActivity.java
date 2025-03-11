@@ -5,5 +5,7 @@ public enum StatutActivity {
     Start,
     Finish,
     Cancel,
-    Pause
+    On_hold,
+    In_progress,
+    Blocked,
 }

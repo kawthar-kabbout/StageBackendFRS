@@ -3,6 +3,7 @@ package com.stage.persistans;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.Collection;
@@ -37,6 +38,9 @@ public class Employer {
     @NonNull
     @ManyToMany
     private List<Activity> activities;
+
+    @NotBlank
+    private String grade;
 
 
 }

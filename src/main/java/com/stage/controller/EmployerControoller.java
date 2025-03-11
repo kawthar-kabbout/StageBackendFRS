@@ -44,6 +44,7 @@ public class EmployerControoller {
             existingEmployer.setAddress(employerDetails.getAddress());
             existingEmployer.setActivities(employerDetails.getActivities());
             existingEmployer.setSkills(employerDetails.getSkills());
+            existingEmployer.setGrade(employerDetails.getGrade());
             Employer updatedEmployer = employerService.save(existingEmployer);
 
             return new ResponseEntity<>(updatedEmployer, HttpStatus.OK);

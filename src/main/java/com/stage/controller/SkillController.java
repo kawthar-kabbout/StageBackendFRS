@@ -36,7 +36,7 @@ public class SkillController {
 
     @PostMapping
     public ResponseEntity<Skill> createSkill(@RequestBody Skill skill) {
-        Skill savedSkill = skillService.createSkill(skill);
+        Skill savedSkill = skillService.save(skill);
         return new ResponseEntity<>(savedSkill, HttpStatus.CREATED);
     }
 

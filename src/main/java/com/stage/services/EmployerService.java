@@ -16,10 +16,12 @@ public class EmployerService {
 
 
     public List<Employer> findAll() {
+
         return employerRepository.findAll();
     }
 
     public Optional<Employer> findById(Long id) {
+
         return employerRepository.findById(id);
     }
 

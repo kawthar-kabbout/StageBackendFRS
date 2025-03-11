@@ -63,6 +63,22 @@ public class MachineService {
     public List<MachineType> getTypes() {
         return Arrays.asList(MachineType.values());
     }
+    public boolean changeMachineStatus(Long id , Machine machine) {
+        if (machineRepository.findById(id).isPresent()) {
+            Machine m=machineRepository.findById(id).get();
+            if (machine.getStatus()){
+                m.setStatus(false);
+                machineRepository.save(m);
+                return true;
+            }else {
+                m.setStatus(true);
+                machineRepository.save(m);
+                return true;
+            }
+        }
+        else
+            return false;
+    }
 
 
 }

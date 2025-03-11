@@ -26,8 +26,8 @@ public class DependanceActivity {
     private Activity predecessorActivity;
     @Column(nullable = false)
     private String dependencyType;
-    @NonNull
+   /* @NonNull
     @ManyToOne
     private Project project;
-    
+    */
 }
