@@ -5,6 +5,7 @@ import com.stage.persistans.Activity;
 import com.stage.persistans.enums.StatutActivity;
 import com.stage.persistans.enums.ActivityType;
 import com.stage.services.ActivityService;
+import com.stage.services.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +20,12 @@ import java.util.Optional;
 public class ActivityController {
     @Autowired
     private ActivityService activityService;
+    private ProjectService projectService;
 
 
     @PostMapping
     public ResponseEntity<Activity> createActivity(@RequestBody @Valid Activity activity) {
-        Activity createdModeleActivity = activityService.createModeleActivity(activity);
+        Activity createdModeleActivity = activityService.createActivity(activity);
         return ResponseEntity.ok(createdModeleActivity);
     }
 
@@ -111,11 +113,13 @@ public class ActivityController {
 
     @GetMapping("/{projectId}/wbs-structure")
     public ResponseEntity<List<ActivityDTO>> getProjectWBSStructure(@PathVariable Long projectId) {
-        // Récupérer la structure WBS depuis le service
+
         List<ActivityDTO> wbsStructure = activityService.getProjectWBSStructure(projectId);
 
-        // Retourner la réponse HTTP avec la structure WBS
+
         return ResponseEntity.ok(wbsStructure);
     }
+
+
 
 }

@@ -80,4 +80,17 @@ public ResponseEntity<Project> getProjectByName(@PathVariable String name) {
         // Retourner la réponse HTTP avec la structure WBS
         return ResponseEntity.ok(wbsStructure);
     }
+
+    //@PostMapping("cloneProject/{id}/{nameNewProject}")
+    @GetMapping("cloneProject/{id}")
+    public ResponseEntity<Project> cloneProject(@PathVariable Long id) {
+        Optional<Project> oldProject = projectService.getProjectById(id);
+        if (oldProject.isPresent()) {
+            projectService.cloneProject(oldProject.get());
+            return ResponseEntity.ok(oldProject.get());
+        }
+else
+    return ResponseEntity.notFound().build();
+
+    }
 }

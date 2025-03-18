@@ -1,5 +1,6 @@
 package com.stage.controller;
 
+import com.stage.dto.ActivityDTO;
 import com.stage.dto.DependanceActivityDTO;
 import com.stage.persistans.Activity;
 import com.stage.persistans.enums.DependencyType;
@@ -61,14 +62,20 @@ public class DependanceActivityController {
      }
     }
 
-
+/*
     @GetMapping("/dependanceActDTO/{id}")
-   public ResponseEntity<DependanceActivityDTO> getModelDependanceActivityDTO(@PathVariable Long id) {
+   public ResponseEntity<List<ActivityDTO>> getModelDependanceActivityDTO(@PathVariable Long id) {
 
         if (activityService.getActivityById(id).isPresent()) {
-            Activity a = activityService.getActivityById(id).get();
-            DependanceActivityDTO dependanceActivityDTO = dependanceActivityService.convertToDTO(a);
-            return ResponseEntity.ok(dependanceActivityDTO);
+            List<Activity> activities = activityService.getActivitiesByProjectId(id);
+            List<ActivityDTO> activityDTOS = new ArrayList<>();
+            for (Activity activity : activities) {
+
+                ActivityDTO activityDTO = dependanceActivityService.convertToActivityDTO(activity);
+                activityDTOS.add(activityDTO);
+            }
+
+            return ResponseEntity.ok(activityDTOS);
         }return ResponseEntity.notFound().build();
-    }
+    }*/
     }

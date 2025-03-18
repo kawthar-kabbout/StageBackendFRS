@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,9 +16,10 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "name")
+
 @ToString
 @Entity
+@Builder
 public class Activity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -25,7 +27,7 @@ public class Activity {
 
     @NonNull
     @NotBlank
-    @Column(unique = true, nullable = false)
+    @Column( nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -43,7 +45,7 @@ public class Activity {
     @ManyToOne
     private Project project;
     @NotEmpty(message = "L'activité doit contenir au moins une compétence")
-        @ManyToMany
+        @ManyToMany(fetch = FetchType.EAGER)
         private List<Skill> skills;
 
     private LocalDateTime plannedStartDate;
@@ -51,6 +53,7 @@ public class Activity {
 
     private LocalDateTime plannedEndDate;
     private LocalDateTime effectiveEndDate;
+    private Duration duration;
 
     public Activity(@NonNull String name, @NonNull ActivityType typeActivity, @NonNull Project project, List<Skill> skills) {
         this.name = name;

@@ -6,7 +6,7 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode (of = "name")
+//@EqualsAndHashCode (of = "name")
 @NoArgsConstructor
 public class Project {
     @Id
