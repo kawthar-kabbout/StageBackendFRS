@@ -1,12 +1,13 @@
 package com.stage.services;
 
 import com.stage.dto.ActivityDTO;
-import com.stage.dto.DependanceActivityDTO;
+import com.stage.persistans.Project;
 import com.stage.persistans.enums.DependencyType;
 import com.stage.persistans.DependanceActivity;
 import com.stage.persistans.Activity;
 import com.stage.repositories.DependanceActivityRepository;
 import com.stage.repositories.ActivityRepository;
+import com.stage.repositories.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,8 @@ import java.util.*;
 public class DependanceActivityService {
     private final DependanceActivityRepository dependanceActivityRepository;
     private final ActivityRepository activityRepository;
+    private final ActivityService activityService;
 
-    private DependanceActivityService dependanceActivityService;
 
     public Optional<DependanceActivity> findById(Long id) {
         return dependanceActivityRepository.findById(id);
@@ -94,77 +95,38 @@ public class DependanceActivityService {
     }
 
 
-
-    public Map<Long, String> findPredecessorActivities(Long id) {
-        Map<Long, String> predecessorMap = new HashMap<>();
-
-        Optional<Activity> optionalActivity = activityRepository.findById(id);
-
-        if (optionalActivity.isPresent()) {
-            Activity activity = optionalActivity.get();
-            List<DependanceActivity> predecessorActivities = dependanceActivityRepository.findByTargetActivity(activity);
-
-            for (DependanceActivity p : predecessorActivities) {
-                predecessorMap.put(
-                        p.getPredecessorActivity().getId(),
-                        p.getDependencyType()
-                );
-            }
+    public List<Activity> cloneDependanceActivityRoot(Project newProject , Project oldProject) {
+        /// find new roots activities
+        List<Activity>rootActivitres=this.activityRepository.findByProjectIdAndParentActivityIsNull(newProject.getId());
+        List<Activity> resultActivitres=new ArrayList<>();
+        for (Activity rootActivity : rootActivitres) {
+            resultActivitres.add(coloneDependanceActivtes(rootActivity ,newProject));
         }
-
-        return predecessorMap;
+return resultActivitres;
     }
 
+    public Activity coloneDependanceActivtes( Activity newactivity ,Project newproject) {
+        Activity oldActivity=this.activityRepository.findById(newactivity.getActivityTemplateId()).get();
+            /// old dep list by target oldact
 
-    public Map<Long, String> findSuccessorActivities(Long id) {
-        Map<Long, String> successorMap = new HashMap<>();
-        Optional<Activity> optionalActivity = activityRepository.findById(id);
+            List<DependanceActivity> dependanceActivities=dependanceActivityRepository.findByTargetActivity(oldActivity);
+            for (DependanceActivity oldd : dependanceActivities) {
+               Activity newProdecesseur=this.activityService.findByActivityTemplateIdAndProjectId(oldd.getPredecessorActivity().getId(),newproject);
+               DependanceActivity newDependanceActivity= DependanceActivity .builder()
+                       .dependencyType(oldd.getDependencyType())
+                       .targetActivity(newactivity)
+                       .predecessorActivity(newProdecesseur)
+                       .build();
 
-        if (optionalActivity.isPresent()) {
-            Activity activity = optionalActivity.get();
-            List<DependanceActivity> successorActivities=dependanceActivityRepository.findByPredecessorActivity(activity);
+               dependanceActivityRepository.save(newDependanceActivity);
 
-            for (DependanceActivity p : successorActivities) {
-                successorMap.put(p.getTargetActivity().getId(), p.getDependencyType());
-            }
+
         }
-
-        return successorMap;
-    }
-
-    public ActivityDTO convertToActivityDTO(Activity activity) {
-        ActivityDTO dto = new ActivityDTO();
-
-        if (activity != null) {
-            dto.setId(activity.getId());
-            dto.setNom(activity.getName());
-            dto.setStatutActivity(activity.getStatut());
-            dto.setTypeActivity(activity.getTypeActivity());
-
-
-            dto.setParentActivityId(activity.getParentActivity().getId());
-
-            dto.setProjectId(activity.getProject().getId());
-
-            dto.setPlannedStartDate(activity.getPlannedStartDate());
-            dto.setEffectiveStartDate(activity.getEffectiveStartDate());
-            dto.setPlannedEndDate(activity.getPlannedEndDate());
-            dto.setEffectiveEndDate(activity.getEffectiveEndDate());
-
-
-            dto.setPredecessorActivity(findPredecessorActivities(activity.getId()));
-            dto.setSuccessorActivity(findSuccessorActivities(activity.getId()));
-
-
-            dto.setChildActivities(new ArrayList<>());
+        List<Activity> childrenActivities = activityRepository.findByParentActivity(newactivity);
+        for (Activity child : childrenActivities) {
+            coloneDependanceActivtes(child ,newproject);
         }
-
-        return dto;
-    }
-
-
-    public void coloneDependanceActivtes(Map<Long, String> structurActivities) {
-
+return newactivity;
 
     }
 }

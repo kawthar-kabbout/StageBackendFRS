@@ -1,15 +1,19 @@
 package com.stage.controller;
 
 import com.stage.dto.ActivityDTO;
+import com.stage.persistans.Activity;
 import com.stage.persistans.Project;
 import com.stage.repositories.ProjectRepository;
 import com.stage.services.ActivityService;
+import com.stage.services.DependanceActivityService;
 import com.stage.services.ProjectService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +24,7 @@ import java.util.Optional;
 public class ProjectController {
     private final ProjectService projectService;
     private final ActivityService activityService;
+    private final DependanceActivityService dependanceActivityService;
 
     @GetMapping
     public ResponseEntity<List<Project>> getProjects() {
@@ -81,16 +86,35 @@ public ResponseEntity<Project> getProjectByName(@PathVariable String name) {
         return ResponseEntity.ok(wbsStructure);
     }
 
-    //@PostMapping("cloneProject/{id}/{nameNewProject}")
-    @GetMapping("cloneProject/{id}")
-    public ResponseEntity<Project> cloneProject(@PathVariable Long id) {
-        Optional<Project> oldProject = projectService.getProjectById(id);
-        if (oldProject.isPresent()) {
-            projectService.cloneProject(oldProject.get());
-            return ResponseEntity.ok(oldProject.get());
-        }
-else
-    return ResponseEntity.notFound().build();
+    @GetMapping("cloneProject/{id}/{name}")
+    public ResponseEntity<?> cloneProject(@PathVariable Long id,@PathVariable String name) {
 
+        Optional<Project> oldProject = projectService.getProjectById(id);
+        if (oldProject.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Project newProject = projectService.cloneProject(oldProject.get(),name);
+        if (newProject == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors du clonage du projet.");
+        }
+
+
+        List<Activity> newActivitiesList = dependanceActivityService.cloneDependanceActivityRoot(newProject,oldProject.get());
+        if (newActivitiesList == null || newActivitiesList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors du clonage des activités dépendantes.");
+        }
+
+
+        List<ActivityDTO> newActivitiesDTO = this.activityService.getProjectWBSStructure(newProject.getId());
+        if (newActivitiesDTO == null || newActivitiesDTO.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la récupération de la structure WBS.");
+        }
+
+
+        return ResponseEntity.ok(newActivitiesDTO);
     }
 }

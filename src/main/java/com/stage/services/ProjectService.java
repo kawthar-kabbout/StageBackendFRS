@@ -38,12 +38,12 @@ public class ProjectService {
     }
 
 
-    public Project cloneProject(Project projectTemplate  ) {
+    public Project cloneProject(Project projectTemplate  , String newName) {
         Project newProject = null;
         if (projectRepository.findById(projectTemplate.getId()).isPresent()) {
             Project project = projectRepository.findById(projectTemplate.getId()).get();
             newProject = new Project();
-            newProject.setName(project.getName() +"new");
+            newProject.setName(newName);
             if (projectRepository.save(newProject) != null) {
                 activityService.cloneActivityProjectRootTree(projectTemplate, projectRepository.save(newProject));
             }

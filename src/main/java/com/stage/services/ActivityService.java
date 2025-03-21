@@ -10,6 +10,7 @@ import com.stage.persistans.enums.StatutActivity;
 import com.stage.persistans.enums.ActivityType;
 import com.stage.repositories.ActivityRepository;
 import com.stage.repositories.DependanceActivityRepository;
+import com.stage.repositories.SkillRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import java.util.*;
 public class ActivityService {
     private final ActivityRepository activityRepository;
     private final DependanceActivityRepository dependanceActivityRepository;
-    private final DependanceActivityService dependanceActivityService;
+   // private final DependanceActivityService dependanceActivityService;
 
 
 
@@ -76,6 +77,11 @@ return  activityRepository.countByProjectId(id);
 
 
 
+    public Activity findByActivityTemplateIdAndProjectId(Long templateId,Project project) {
+        return  this.activityRepository.findByActivityTemplateIdAndProjectId(templateId,project.getId());
+    }
+
+
 
     public List<ActivityDTO> getProjectWBSStructure(Long projectId) {
         List<Activity> rootActivities = activityRepository.findByProjectIdAndParentActivityIsNull(projectId);
@@ -92,7 +98,6 @@ return  activityRepository.countByProjectId(id);
 
 
     private ActivityDTO buildActivityTree(Activity activity) {
-
         ActivityDTO dto = new ActivityDTO(
                 activity.getId(),
                 activity.getName(),
@@ -100,6 +105,7 @@ return  activityRepository.countByProjectId(id);
                 activity.getTypeActivity(),
                 activity.getParentActivity() != null ? activity.getParentActivity().getId() : null,
                 activity.getProject().getId(),
+                null,
                 activity.getDuration(),
                 activity.getPlannedStartDate(),
                 activity.getEffectiveStartDate(),
@@ -109,10 +115,7 @@ return  activityRepository.countByProjectId(id);
                 findSuccessorActivities(activity.getId()),
                 new ArrayList<>()
         );
-
-
         List<Activity> childrenActivities = activityRepository.findByParentActivity(activity);
-
         if (!childrenActivities.isEmpty()) {
             List<ActivityDTO> childrenDTOs = new ArrayList<>();
             for (Activity child : childrenActivities) {
@@ -120,11 +123,8 @@ return  activityRepository.countByProjectId(id);
             }
             dto.setChildActivities(childrenDTOs);
         }
-
         return dto;
     }
-
-
 
 
 
@@ -141,7 +141,7 @@ return  activityRepository.countByProjectId(id);
             for (DependanceActivity p : predecessorActivities) {
                 predecessorMap.put(
                         p.getPredecessorActivity().getId(),
-                        p.getDependencyType()
+                        p.getDependencyType().name()
                 );
             }
         }
@@ -159,67 +159,70 @@ return  activityRepository.countByProjectId(id);
             List<DependanceActivity> successorActivities=dependanceActivityRepository.findByPredecessorActivity(activity);
 
             for (DependanceActivity p : successorActivities) {
-                successorMap.put(p.getTargetActivity().getId(), p.getDependencyType());
+                successorMap.put(p.getTargetActivity().getId(), p.getDependencyType().name());
             }
         }
 
         return successorMap;
     }
 
-    public ActivityDTO convertToActivityDTO(Activity activity) {
+    public ActivityDTO convertToActivityDTOTemplateNew(Activity activity, Long activityTemplateId) {
         ActivityDTO dto = new ActivityDTO();
 
         if (activity != null) {
             dto.setId(activity.getId());
             dto.setNom(activity.getName());
-            dto.setStatutActivity(activity.getStatut());
-            dto.setTypeActivity(activity.getTypeActivity());
+            dto.setActivityTemplateId(activityTemplateId);
 
 
-            dto.setParentActivityId(activity.getParentActivity().getId());
-
-            dto.setProjectId(activity.getProject().getId());
-
-            dto.setPlannedStartDate(activity.getPlannedStartDate());
-            dto.setEffectiveStartDate(activity.getEffectiveStartDate());
-            dto.setPlannedEndDate(activity.getPlannedEndDate());
-            dto.setEffectiveEndDate(activity.getEffectiveEndDate());
+            if (activity.getParentActivity() != null) {
+                dto.setParentActivityId(activity.getParentActivity().getId());
+            } else {
+                dto.setParentActivityId(null);
+            }
 
 
-            dto.setPredecessorActivity(findPredecessorActivities(activity.getId()));
-            dto.setSuccessorActivity(findSuccessorActivities(activity.getId()));
-
-
-            dto.setChildActivities(new ArrayList<>());
+            if (activity.getProject() != null) {
+                dto.setProjectId(activity.getProject().getId());
+            } else {
+                dto.setProjectId(null);
+            }
         }
-
         return dto;
     }
 
-    public void cloneActivityProjectRootTree(Project oldProject, Project newProject) {
+
+
+
+public void cloneActivityProjectRootTree(Project oldProject, Project newProject) {
         List<Activity> roots = activityRepository.findByProjectIdAndParentActivityIsNull(oldProject.getId());
-
+        List<Activity> result = new ArrayList<>();
         for (Activity root : roots) {
-
-            Activity newRoot = cloneActivity(root, newProject, null);
-          //  activitiesTree.put(root.getId(), newRoot);
+                result.add(cloneActivity(root, newProject, null));
         }
+
 
     }
 
     private Activity cloneActivity(Activity oldActivity, Project newProject, Activity newParent) {
-        Activity newActivity = new Activity();
-        newActivity.setName(oldActivity.getName());
-        newActivity.setStatut(oldActivity.getStatut());
-        newActivity.setTypeActivity(oldActivity.getTypeActivity());
-        newActivity.setParentActivity(newParent);
-        newActivity.setPlannedStartDate(oldActivity.getPlannedStartDate());
-        newActivity.setEffectiveStartDate(oldActivity.getEffectiveStartDate());
-        newActivity.setPlannedEndDate(oldActivity.getPlannedEndDate());
-        newActivity.setEffectiveEndDate(oldActivity.getEffectiveEndDate());
-        newActivity.setSkills(oldActivity.getSkills().stream().toList());
-        newActivity.setProject(newProject);
+        Activity newActivity =  Activity.builder()
+                .parentActivity(newParent)
+                .activityTemplateId(oldActivity.getActivityTemplateId())
+                .name(oldActivity.getName())
+                .project(newProject)
+                .duration(oldActivity.getDuration())
+                .typeActivity(oldActivity.getTypeActivity())
+                .effectiveEndDate(oldActivity.getEffectiveEndDate())
+                .plannedStartDate(oldActivity.getPlannedStartDate())
+                .plannedEndDate(oldActivity.getPlannedEndDate())
+                .effectiveStartDate(oldActivity.getEffectiveStartDate())
+                .statut(oldActivity.getStatut())
+                .skills(oldActivity.getSkills().stream().toList())
+                .activityTemplateId(oldActivity.getId())
+                .build();
+
         newActivity = createActivity(newActivity);
+
 
 
         List<Activity> childrenActivities = activityRepository.findByParentActivity(oldActivity);
@@ -227,7 +230,8 @@ return  activityRepository.countByProjectId(id);
             for (Activity child : childrenActivities) {
                 cloneActivity(child,newProject,newActivity );
             }
-
         return newActivity;
     }
 }
+
+

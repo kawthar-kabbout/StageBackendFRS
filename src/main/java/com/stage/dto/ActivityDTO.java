@@ -24,10 +24,10 @@ public class ActivityDTO {
     private ActivityType typeActivity;
     private Long parentActivityId;
     private Long projectId;
+    private Long activityTemplateId;
     private Duration duration;
     private LocalDateTime plannedStartDate;
     private LocalDateTime effectiveStartDate;
-
     private LocalDateTime plannedEndDate;
     private LocalDateTime effectiveEndDate;
     private Map<Long, String> predecessorActivity;
@@ -39,13 +39,4 @@ public class ActivityDTO {
     public ActivityDTO(Activity a) {
     }
 
-
-    public <E> ActivityDTO(Long id, @NonNull @NotBlank String name, StatutActivity statut, ActivityType typeActivity, Long aLong, Long id1, LocalDateTime plannedEndDate, LocalDateTime plannedStartDate, ArrayList<E> es) {
-    }
-
-    public <E, V, K> ActivityDTO(Long id, @NonNull @NotBlank String name, StatutActivity statut, ActivityType typeActivity, Long aLong, Long id1, ArrayList<E> es, LocalDateTime effectiveEndDate, LocalDateTime plannedEndDate, LocalDateTime effectiveStartDate, LocalDateTime plannedStartDate, HashMap<K,V> kvHashMap, Object o, HashMap<K,V> kvHashMap1) {
-    }
-
-    public <E, V, K> ActivityDTO(Long id, @NonNull @NotBlank String name, StatutActivity statut, ActivityType typeActivity, Long aLong, Long id1, LocalDateTime plannedEndDate, LocalDateTime plannedStartDate, ArrayList<E> es, HashMap<K,V> kvHashMap, HashMap<K,V> kvHashMap1) {
-    }
 }

@@ -1,5 +1,7 @@
 package com.stage.persistans;
 
+import com.stage.persistans.enums.ActivityType;
+import com.stage.persistans.enums.DependencyType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,7 +9,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
+@Builder
 @ToString
 @Entity
 @Table(
@@ -24,8 +26,14 @@ public class DependanceActivity {
     @ManyToOne
     @JoinColumn( nullable = false)
     private Activity predecessorActivity;
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String dependencyType;
+    private DependencyType dependencyType;
+
+    public DependanceActivity(Activity activity3, Activity activity2, DependencyType dependencyType) {
+    }
+
+
    /* @NonNull
     @ManyToOne
     private Project project;
