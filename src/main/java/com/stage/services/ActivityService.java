@@ -171,7 +171,7 @@ return  activityRepository.countByProjectId(id);
 
         if (activity != null) {
             dto.setId(activity.getId());
-            dto.setNom(activity.getName());
+            dto.setName(activity.getName());
             dto.setActivityTemplateId(activityTemplateId);
 
 

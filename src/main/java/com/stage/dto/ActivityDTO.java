@@ -19,7 +19,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class ActivityDTO {
     private Long id;
-    private String nom;
+    private String name;
     private StatutActivity statutActivity;
     private ActivityType typeActivity;
     private Long parentActivityId;
