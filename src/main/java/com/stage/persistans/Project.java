@@ -15,6 +15,7 @@ public class Project {
     @NonNull
     @Column(unique = true, nullable = false)
     private String name;
+    private Long projectTemplateId;
 
     public Project(@NonNull String name) {
         this.name = name;

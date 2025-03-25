@@ -42,7 +42,7 @@ public class EmployerControoller {
             existingEmployer.setLastName(employerDetails.getLastName());
             existingEmployer.setPhone(employerDetails.getPhone());
             existingEmployer.setAddress(employerDetails.getAddress());
-            existingEmployer.setActivities(employerDetails.getActivities());
+
             existingEmployer.setSkills(employerDetails.getSkills());
             existingEmployer.setGrade(employerDetails.getGrade());
             Employer updatedEmployer = employerService.save(existingEmployer);

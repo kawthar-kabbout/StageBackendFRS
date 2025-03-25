@@ -1,6 +1,9 @@
 package com.stage.dto;
 
 import com.stage.persistans.Activity;
+import com.stage.persistans.Employer;
+import com.stage.persistans.Machine;
+import com.stage.persistans.Project;
 import com.stage.persistans.enums.StatutActivity;
 import com.stage.persistans.enums.ActivityType;
 import jakarta.validation.constraints.NotBlank;
@@ -23,9 +26,9 @@ public class ActivityDTO {
     private StatutActivity statutActivity;
     private ActivityType typeActivity;
     private Long parentActivityId;
-    private Long projectId;
+    private Project projectId;
     private Long activityTemplateId;
-    private Duration duration;
+    private Integer duration;
     private LocalDateTime plannedStartDate;
     private LocalDateTime effectiveStartDate;
     private LocalDateTime plannedEndDate;
@@ -33,6 +36,8 @@ public class ActivityDTO {
     private Map<Long, String> predecessorActivity;
     private Map<Long, String> successorActivity;
     private List<ActivityDTO> childActivities;
+    private List<Employer>employees ;
+    private List<Machine>machines;
 
 
 

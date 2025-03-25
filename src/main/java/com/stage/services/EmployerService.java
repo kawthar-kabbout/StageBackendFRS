@@ -43,15 +43,7 @@ public class EmployerService {
         }
         employerRepository.delete(employer);
     }
-    ////Pour afficher la liste des employés assignés à cette activité.
-    public List<Employer> findByActivities_Id(Long id) {
-        List<Employer> employers= employerRepository.findByActivities_Id((id));
-        if (!employers.isEmpty()) {
-            return employers;
-        }else {
-         return null;
-        }
-    }
+
 
 
 }

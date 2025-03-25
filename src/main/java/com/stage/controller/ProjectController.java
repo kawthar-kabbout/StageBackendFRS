@@ -1,5 +1,6 @@
 package com.stage.controller;
 
+import com.stage.dto.ActiviteFrontDTO;
 import com.stage.dto.ActivityDTO;
 import com.stage.persistans.Activity;
 import com.stage.persistans.Project;
@@ -82,19 +83,20 @@ public ResponseEntity<Project> getProjectByName(@PathVariable String name) {
         // Récupérer la structure WBS depuis le service
         List<ActivityDTO> wbsStructure = activityService.getProjectWBSStructure(projectId);
 
-        // Retourner la réponse HTTP avec la structure WBS
+
         return ResponseEntity.ok(wbsStructure);
     }
 
-    @GetMapping("cloneProject/{id}/{name}")
-    public ResponseEntity<?> cloneProject(@PathVariable Long id,@PathVariable String name) {
+    @PostMapping("cloneProject/{id}/{name}")
+    public ResponseEntity<?> cloneProject(@PathVariable Long id,@PathVariable String name,
+                                          @RequestBody List<ActiviteFrontDTO> activitesFrontDTO) {
 
         Optional<Project> oldProject = projectService.getProjectById(id);
         if (oldProject.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Project newProject = projectService.cloneProject(oldProject.get(),name);
+        Project newProject = projectService.cloneProject(oldProject.get(),name,activitesFrontDTO);
         if (newProject == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur lors du clonage du projet.");
@@ -113,6 +115,9 @@ public ResponseEntity<Project> getProjectByName(@PathVariable String name) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur lors de la récupération de la structure WBS.");
         }
+
+
+//    activityService.updateActivitiesCloningRoot(activitesFrontDTO, newProject.getId());
 
 
         return ResponseEntity.ok(newActivitiesDTO);

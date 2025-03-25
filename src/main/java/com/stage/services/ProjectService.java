@@ -1,5 +1,6 @@
 package com.stage.services;
 
+import com.stage.dto.ActiviteFrontDTO;
 import com.stage.persistans.Project;
 import com.stage.repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,14 +39,15 @@ public class ProjectService {
     }
 
 
-    public Project cloneProject(Project projectTemplate  , String newName) {
+    public Project cloneProject(Project projectTemplate  , String newName,List<ActiviteFrontDTO> activitesFrontDTO) {
         Project newProject = null;
         if (projectRepository.findById(projectTemplate.getId()).isPresent()) {
             Project project = projectRepository.findById(projectTemplate.getId()).get();
             newProject = new Project();
             newProject.setName(newName);
+            newProject.setProjectTemplateId(projectTemplate.getId());
             if (projectRepository.save(newProject) != null) {
-                activityService.cloneActivityProjectRootTree(projectTemplate, projectRepository.save(newProject));
+                activityService.cloneActivityProjectRootTree(projectTemplate, projectRepository.save(newProject),activitesFrontDTO);
             }
 
         }

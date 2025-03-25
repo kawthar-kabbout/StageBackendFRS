@@ -2,10 +2,12 @@ package com.stage.services;
 
 import com.stage.persistans.CategoryType;
 import com.stage.repositories.CategoryTypeRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,11 +30,7 @@ public class CategoryTypeService {
     }
 
     public CategoryType update(CategoryType categoryType) {
-        CategoryType oldCategoryType = categoryTypeRepository.findById(categoryType.getId()).get();
-        if (oldCategoryType != null) {
-            oldCategoryType.setCategoryType(categoryType.getCategoryType());
-            categoryTypeRepository.save(oldCategoryType);
-        }
-        return oldCategoryType;
+        return categoryTypeRepository.save(categoryType);
     }
+
 }

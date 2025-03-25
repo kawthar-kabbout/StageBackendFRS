@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,9 +31,11 @@ public class CategoryTypeController {
     }
     @PutMapping("/{id}")
     public ResponseEntity<CategoryType> update(@PathVariable Long id, @RequestBody CategoryType categoryType) {
-        if (categoryTypeService.findById(id) == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(categoryTypeService.update(categoryType));
+      CategoryType existingCategoryType = categoryTypeService.findById(id);
+      if (existingCategoryType != null) {
+          categoryType.setId(id);
+          categoryTypeService.save(categoryType);
+          return ResponseEntity.ok(categoryType);
+      }else  return ResponseEntity.notFound().build();
     }
 }

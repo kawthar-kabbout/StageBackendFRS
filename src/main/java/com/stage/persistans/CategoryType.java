@@ -1,10 +1,11 @@
 package com.stage.persistans;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -18,4 +19,6 @@ public class CategoryType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String categoryType;
+    @ManyToMany(fetch = FetchType.EAGER)
+    protected List<Skill> skillsCategory=new ArrayList<>();
 }

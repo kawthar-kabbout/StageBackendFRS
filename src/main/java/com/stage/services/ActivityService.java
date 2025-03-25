@@ -1,11 +1,9 @@
 package com.stage.services;
 
 
+import com.stage.dto.ActiviteFrontDTO;
 import com.stage.dto.ActivityDTO;
-import com.stage.persistans.Activity;
-import com.stage.persistans.DependanceActivity;
-import com.stage.persistans.Project;
-import com.stage.persistans.Skill;
+import com.stage.persistans.*;
 import com.stage.persistans.enums.StatutActivity;
 import com.stage.persistans.enums.ActivityType;
 import com.stage.repositories.ActivityRepository;
@@ -104,7 +102,7 @@ return  activityRepository.countByProjectId(id);
                 activity.getStatut(),
                 activity.getTypeActivity(),
                 activity.getParentActivity() != null ? activity.getParentActivity().getId() : null,
-                activity.getProject().getId(),
+                activity.getProject(),
                 null,
                 activity.getDuration(),
                 activity.getPlannedStartDate(),
@@ -113,7 +111,9 @@ return  activityRepository.countByProjectId(id);
                 activity.getEffectiveEndDate(),
                 findPredecessorActivities(activity.getId()),
                 findSuccessorActivities(activity.getId()),
-                new ArrayList<>()
+                new ArrayList<>(),
+                activity.getEmployees()!=null?activity.getEmployees().stream().toList():null,
+                activity.getMachines() !=null?activity.getMachines().stream().toList():null
         );
         List<Activity> childrenActivities = activityRepository.findByParentActivity(activity);
         if (!childrenActivities.isEmpty()) {
@@ -183,7 +183,7 @@ return  activityRepository.countByProjectId(id);
 
 
             if (activity.getProject() != null) {
-                dto.setProjectId(activity.getProject().getId());
+                dto.setProjectId(activity.getProject());
             } else {
                 dto.setProjectId(null);
             }
@@ -194,31 +194,37 @@ return  activityRepository.countByProjectId(id);
 
 
 
-public void cloneActivityProjectRootTree(Project oldProject, Project newProject) {
+public void cloneActivityProjectRootTree(Project oldProject, Project newProject,List<ActiviteFrontDTO> activitesFrontDTO) {
         List<Activity> roots = activityRepository.findByProjectIdAndParentActivityIsNull(oldProject.getId());
         List<Activity> result = new ArrayList<>();
         for (Activity root : roots) {
-                result.add(cloneActivity(root, newProject, null));
+                result.add(cloneActivity(root, newProject, null,activitesFrontDTO));
         }
 
 
     }
 
-    private Activity cloneActivity(Activity oldActivity, Project newProject, Activity newParent) {
+    private Activity cloneActivity(Activity oldActivity, Project newProject, Activity newParent,List<ActiviteFrontDTO> activitesFrontDTO) {
+
+
+        ActiviteFrontDTO dto = activitesFrontDTO.stream().filter((activityDto -> activityDto.getId() == oldActivity.getId())).findFirst().orElse(null);
+
         Activity newActivity =  Activity.builder()
                 .parentActivity(newParent)
                 .activityTemplateId(oldActivity.getActivityTemplateId())
                 .name(oldActivity.getName())
                 .project(newProject)
-                .duration(oldActivity.getDuration())
+                .duration(dto !=null?dto.getDuration():null)
                 .typeActivity(oldActivity.getTypeActivity())
-                .effectiveEndDate(oldActivity.getEffectiveEndDate())
-                .plannedStartDate(oldActivity.getPlannedStartDate())
-                .plannedEndDate(oldActivity.getPlannedEndDate())
-                .effectiveStartDate(oldActivity.getEffectiveStartDate())
-                .statut(oldActivity.getStatut())
+                .effectiveEndDate(null)
+                .plannedStartDate(null)
+                .plannedEndDate(null)
+                .effectiveStartDate(null)
+                .statut(StatutActivity.Pending)
                 .skills(oldActivity.getSkills().stream().toList())
                 .activityTemplateId(oldActivity.getId())
+                .machines(dto != null ? dto.getMachines() : null)
+                .employees(dto != null ? dto.getEmployers() : null)
                 .build();
 
         newActivity = createActivity(newActivity);
@@ -228,9 +234,38 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject)
         List<Activity> childrenActivities = activityRepository.findByParentActivity(oldActivity);
 
             for (Activity child : childrenActivities) {
-                cloneActivity(child,newProject,newActivity );
+                cloneActivity(child,newProject,newActivity,activitesFrontDTO );
             }
         return newActivity;
+    }
+
+  public void updateActivitiesCloningRoot(List<ActiviteFrontDTO> newActiviteFrontDTO ,Long newProject ) {
+        List<Activity> roots = activityRepository.findByProjectIdAndParentActivityIsNull(newProject);
+        List<Activity> result = new ArrayList<>();
+        for (Activity root : roots) {
+            result.add(updateActivityCloning(root , newActiviteFrontDTO));
+        }
+    }
+    private  Activity updateActivityCloning(Activity activity ,List<ActiviteFrontDTO> newActiviteFrontDTO ) {
+
+
+        for (ActiviteFrontDTO f : newActiviteFrontDTO) {
+            if(activity.getActivityTemplateId()==f.getId())
+            {
+
+                activity.setEmployees(List.of(f.getEmployers().get(0)));
+              //  activity.setMachines(f.getMachines().stream().toList());
+//                activity.setDuration(f.getDuration());
+               updateActivity(activity);
+            }
+        }
+        List<Activity> childrenActivities = activityRepository.findByParentActivity(activity);
+
+        for (Activity child : childrenActivities) {
+            updateActivityCloning(child,newActiviteFrontDTO );
+        }
+        return activity;
+
     }
 }
 

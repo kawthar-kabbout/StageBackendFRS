@@ -36,8 +36,6 @@ public class Employer {
     @ManyToMany
     private List<Skill>skills;
     @NonNull
-    @ManyToMany
-    private List<Activity> activities;
 
     @NotBlank
     private String grade;
