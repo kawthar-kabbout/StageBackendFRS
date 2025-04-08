@@ -6,6 +6,7 @@ import com.stage.persistans.Activity;
 import com.stage.persistans.Project;
 import com.stage.repositories.ProjectRepository;
 import com.stage.services.ActivityService;
+import com.stage.services.ChocosolverService;
 import com.stage.services.DependanceActivityService;
 import com.stage.services.ProjectService;
 import lombok.Getter;
@@ -26,6 +27,7 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ActivityService activityService;
     private final DependanceActivityService dependanceActivityService;
+    private final ChocosolverService chocosolverService;
 
     @GetMapping
     public ResponseEntity<List<Project>> getProjects() {
@@ -116,10 +118,22 @@ public ResponseEntity<Project> getProjectByName(@PathVariable String name) {
                     .body("Erreur lors de la récupération de la structure WBS.");
         }
 
-
 //    activityService.updateActivitiesCloningRoot(activitesFrontDTO, newProject.getId());
 
 
         return ResponseEntity.ok(newActivitiesDTO);
+    }
+
+    @GetMapping("/solveNewProject/{newProjectId}")
+    public ResponseEntity<String> solveNewProject(@PathVariable Long newProjectId) {
+        // Appel du service pour résoudre le projet
+        boolean isSolved = chocosolverService.chocosolver(newProjectId);
+
+        // Retourner une réponse HTTP basée sur le résultat
+        if (isSolved) {
+            return ResponseEntity.ok("Le projet avec l'ID " + newProjectId + " a été résolu avec succès.");
+        } else {
+            return ResponseEntity.badRequest().body("Échec de la résolution du projet avec l'ID " + newProjectId);
+        }
     }
 }

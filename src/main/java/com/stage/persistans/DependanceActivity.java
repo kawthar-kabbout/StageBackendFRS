@@ -29,13 +29,10 @@ public class DependanceActivity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DependencyType dependencyType;
-
+    private int delay;
     public DependanceActivity(Activity activity3, Activity activity2, DependencyType dependencyType) {
     }
 
 
-   /* @NonNull
-    @ManyToOne
-    private Project project;
-    */
+
 }

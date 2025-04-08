@@ -1,35 +1,33 @@
 package com.stage.services;
 
-import com.stage.persistans.CategoryType;
-import com.stage.repositories.CategoryTypeRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.stage.persistans.CapabilityMachine;
+import com.stage.repositories.CapabilityMachineRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CategoryTypeService {
-    private final CategoryTypeRepository categoryTypeRepository;
+    private final CapabilityMachineRepository categoryTypeRepository;
 
 
-    public List<CategoryType> findAll() {
+    public List<CapabilityMachine> findAll() {
         return categoryTypeRepository.findAll();
     }
-    public CategoryType findById(Long id) {
+    public CapabilityMachine findById(Long id) {
         return categoryTypeRepository.findById(id).orElse(null);
     }
-    public CategoryType save(CategoryType categoryType) {
+    public CapabilityMachine save(CapabilityMachine categoryType) {
         return categoryTypeRepository.save(categoryType);
     }
 
-    public void delete(CategoryType categoryType) {
+    public void delete(CapabilityMachine categoryType) {
         categoryTypeRepository.delete(categoryType);
     }
 
-    public CategoryType update(CategoryType categoryType) {
+    public CapabilityMachine update(CapabilityMachine categoryType) {
         return categoryTypeRepository.save(categoryType);
     }
 

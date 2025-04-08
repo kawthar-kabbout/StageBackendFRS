@@ -109,6 +109,7 @@ return  activityRepository.countByProjectId(id);
                 activity.getEffectiveStartDate(),
                 activity.getPlannedEndDate(),
                 activity.getEffectiveEndDate(),
+
                 findPredecessorActivities(activity.getId()),
                 findSuccessorActivities(activity.getId()),
                 new ArrayList<>(),
@@ -221,10 +222,12 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject,
                 .plannedEndDate(null)
                 .effectiveStartDate(null)
                 .statut(StatutActivity.Pending)
-                .skills(oldActivity.getSkills().stream().toList())
+                .skill(oldActivity.getSkill())
+                .capabilityMachine(oldActivity.getCapabilityMachine())
                 .activityTemplateId(oldActivity.getId())
                 .machines(dto != null ? dto.getMachines() : null)
                 .employees(dto != null ? dto.getEmployers() : null)
+                .employersNumber(1)
                 .build();
 
         newActivity = createActivity(newActivity);

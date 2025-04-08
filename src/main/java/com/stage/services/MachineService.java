@@ -35,14 +35,7 @@ public class MachineService {
         machineRepository.delete(machine);
     }
 
-    public List<Machine> finbByIdActivity(Long id) {
-       List<Machine>machines=machineRepository.findByActivities_Id(id);
-        if (!machines.isEmpty()) {
-       return machines;
-       }else {
-           return null;
-       }
-    }
+
 
     public Machine update(Long id, Machine machine) {
       if(machineRepository.findById(id).isPresent()) {
@@ -50,8 +43,8 @@ public class MachineService {
           m.setName(machine.getName());
           m.setSerialNumber(machine.getSerialNumber());
           m.setMachineType(machine.getMachineType());
-          m.setSkills(machine.getSkills());
-          m.setActivities(machine.getActivities());
+          m.setCapabilityMachines(machine.getCapabilityMachines());
+
           m.setStatus(machine.getStatus());
           m.setMarque(machine.getMarque());
           machineRepository.save(m);

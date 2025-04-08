@@ -86,6 +86,20 @@ public class DependanceActivityService {
     }
 
 
+
+    public List<DependanceActivity> getDependenceActivitiesByProjectId(Long projectId) {
+
+        List<Activity>activities=activityService.getActivitiesByProjectId(projectId);
+        List<DependanceActivity> dependenceActivities=new ArrayList<>();
+        for (Activity activity:activities) {
+            List<DependanceActivity>dependanceActivities= dependanceActivityRepository.findByTargetActivity(activity);
+            dependenceActivities.addAll(dependanceActivities);
+        }
+        return dependenceActivities;
+
+    }
+
+
     public boolean existsDependance(Long target, Long predecessor ) {
       if(dependanceActivityRepository.countByTargetAndPredecessorNative(target, predecessor) >=1)
 

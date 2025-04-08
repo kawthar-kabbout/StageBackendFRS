@@ -4,6 +4,7 @@ import com.stage.persistans.Activity;
 import com.stage.persistans.DependanceActivity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -16,4 +17,7 @@ public interface DependanceActivityRepository extends JpaRepository<DependanceAc
                 nativeQuery = true)
         int countByTargetAndPredecessorNative(Long targetActivityId, Long predecessorActivityId);
 
+
 }
+
+

@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface MachineRepository extends JpaRepository<Machine, Long> {
-    List<Machine> findByActivities_Id(Long id);
+
 }
