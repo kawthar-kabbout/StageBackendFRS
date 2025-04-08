@@ -114,7 +114,7 @@ return  activityRepository.countByProjectId(id);
                 findSuccessorActivities(activity.getId()),
                 new ArrayList<>(),
                 activity.getEmployees()!=null?activity.getEmployees().stream().toList():null,
-                activity.getMachines() !=null?activity.getMachines().stream().toList():null
+                activity.getMachine()
         );
         List<Activity> childrenActivities = activityRepository.findByParentActivity(activity);
         if (!childrenActivities.isEmpty()) {
@@ -125,6 +125,30 @@ return  activityRepository.countByProjectId(id);
             dto.setChildActivities(childrenDTOs);
         }
         return dto;
+    }
+
+
+
+    public List<ActivityDTO> getActivitesHasNoChildren(Long projectId) {
+        List<ActivityDTO> activitesTree = getProjectWBSStructure(projectId);
+        List<ActivityDTO> activitesHasNoChildren = new ArrayList<>();
+
+        for (ActivityDTO dto : activitesTree) {
+            collectLeafActivities(dto, activitesHasNoChildren);
+        }
+
+        return activitesHasNoChildren;
+    }
+
+    private void collectLeafActivities(ActivityDTO activity, List<ActivityDTO> leaves) {
+        List<ActivityDTO> children = activity.getChildActivities();
+        if (children == null || children.isEmpty()) {
+            leaves.add(activity);
+        } else {
+            for (ActivityDTO child : children) {
+                collectLeafActivities(child, leaves);
+            }
+        }
     }
 
 
@@ -167,30 +191,7 @@ return  activityRepository.countByProjectId(id);
         return successorMap;
     }
 
-    public ActivityDTO convertToActivityDTOTemplateNew(Activity activity, Long activityTemplateId) {
-        ActivityDTO dto = new ActivityDTO();
-
-        if (activity != null) {
-            dto.setId(activity.getId());
-            dto.setName(activity.getName());
-            dto.setActivityTemplateId(activityTemplateId);
-
-
-            if (activity.getParentActivity() != null) {
-                dto.setParentActivityId(activity.getParentActivity().getId());
-            } else {
-                dto.setParentActivityId(null);
-            }
-
-
-            if (activity.getProject() != null) {
-                dto.setProjectId(activity.getProject());
-            } else {
-                dto.setProjectId(null);
-            }
-        }
-        return dto;
-    }
+   
 
 
 
@@ -225,8 +226,8 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject,
                 .skill(oldActivity.getSkill())
                 .capabilityMachine(oldActivity.getCapabilityMachine())
                 .activityTemplateId(oldActivity.getId())
-                .machines(dto != null ? dto.getMachines() : null)
-                .employees(dto != null ? dto.getEmployers() : null)
+                .machine(null)
+                .employees(null)
                 .employersNumber(1)
                 .build();
 

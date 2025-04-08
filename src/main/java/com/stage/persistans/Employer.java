@@ -15,6 +15,7 @@ import java.util.List;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class Employer {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

@@ -130,13 +130,13 @@ public class FirstTimeInit implements CommandLineRunner {
 
         if (modeleActivityRepository.count() == 0) {
             if (p1 != null && p2 != null && s1 != null && s2 != null) {
-                activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, s1, c1);
-                activity2 = new Activity("Activité 2", ActivityType.EXTERNE, p2, s1, c1);
-                activity3 = new Activity("Activité 3", ActivityType.EXTERNE, p2, s2, c2);
-                activity4 = new Activity("Activité 4", ActivityType.EXTERNE, p2, s2, null);
-                activity5 = new Activity("Activité 5", ActivityType.SOUS_TRAITANCE, p2, (Skill) null, null);
-                activity6 = new Activity("Activité 6", ActivityType.SOUS_TRAITANCE, p2, (Skill) null, null);
-                activity7 = new Activity("Activité 7", ActivityType.SOUS_TRAITANCE, p2, (Skill) null, null);
+                activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, c1, s1,90,1);
+                activity2 = new Activity("Activité 2", ActivityType.EXTERNE, p2, c1, s1,50,1);
+                activity3 = new Activity("Activité 3", ActivityType.EXTERNE, p2, c2, s2,30,1);
+                activity4 = new Activity("Activité 4", ActivityType.EXTERNE, p2, null,s2,40,1);
+                activity5 = new Activity("Activité 5", ActivityType.SOUS_TRAITANCE, p2, null,null,10,0);
+                activity6 = new Activity("Activité 6", ActivityType.SOUS_TRAITANCE, p2, null,null,6,0);
+                activity7 = new Activity("Activité 7", ActivityType.SOUS_TRAITANCE, p2, null,null,5,0);
 
                 modeleActivityRepository.save(activity1);
                 modeleActivityRepository.save(activity2);
@@ -149,10 +149,10 @@ public class FirstTimeInit implements CommandLineRunner {
         }
 
       // Création des dépendances entre activités
-      /*  if (activity1 != null && activity2 != null && activity3 != null && activity4 != null && activity5 != null) {
+   /*     if (activity1 != null && activity2 != null && activity3 != null && activity4 != null && activity5 != null) {
             // Vérification que les activités existent avant de créer les dépendances
             if (activity3.getId() != null && activity2.getId() != null) {
-                DependanceActivity d1 = new DependanceActivity(activity3, activity2, DependencyType.FF);
+                DependanceActivity d1 = new DependanceActivity(activity3, activity2, DependencyType.FS);
                 dependanceActivityRepository.save(d1);
             }
 

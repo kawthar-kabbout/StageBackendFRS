@@ -42,8 +42,8 @@ public class Activity {
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Employer> employees = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    private List<Machine> machines = new ArrayList<>();
+    @ManyToOne
+    private Machine machine ;
 
     @NonNull
     @ManyToOne
@@ -64,15 +64,16 @@ public class Activity {
     private int employersNumber;
 
 
-    public Activity(@NonNull String name, ActivityType typeActivity, @NonNull Project project, Skill skill,CapabilityMachine capabilityMachine) {
+
+    public Activity(@NonNull String name, ActivityType typeActivity, @NonNull Project project, CapabilityMachine capabilityMachine, Skill skill, Integer duration, int employersNumber) {
         this.name = name;
         this.typeActivity = typeActivity;
         this.project = project;
-        this.skill = skill;
         this.capabilityMachine = capabilityMachine;
+        this.skill = skill;
+        this.duration = duration;
+        this.employersNumber = employersNumber;
     }
-
-
 
     public <E> Activity(String s, Activity activity1, ActivityType activityType, Project p2, List<E> s2) {
     }
@@ -81,4 +82,6 @@ public class Activity {
 
     public <E> Activity(String s, ActivityType activityType, Project p2, Activity activity2, List<E> s2) {
     }
+
+
 }

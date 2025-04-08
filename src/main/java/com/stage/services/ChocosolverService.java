@@ -1,12 +1,16 @@
 package com.stage.services;
 
 import com.stage.persistans.*;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 @RequiredArgsConstructor
 @Service
@@ -17,7 +21,7 @@ private final ActivityService activityService;
 private final MachineService machineService;
 private final DependanceActivityService dependanceActivityService;
 
-    public boolean chocosolver(Long projectId) {
+    public List <Activity>chocosolver(Long projectId) {
         // Récupération des données initiales
         List<Employer> employers = employerService.findAll();
         List<Activity> activities = activityService.getActivitiesByProjectId(projectId);
@@ -59,6 +63,9 @@ private final DependanceActivityService dependanceActivityService;
             // Condition 1 : Si l'activité n'a pas de compétence (Skill == null)
             if (activity.getSkill() == null) {
                 // Aucun employeur ni machine ne doit être affecté
+                System.out.println("skill" +activity.getSkill());
+
+
                 for (int j = 0; j < employers.size(); j++) {
                     model.arithm(employerAssignment[i][j], "=", 0).post();
                 }
@@ -174,11 +181,13 @@ private final DependanceActivityService dependanceActivityService;
         Solver solver = model.getSolver();
         solver.limitSolution(100); // Limite à 10 solutions
         int solutionCount = 0;
-
+         List<Activity>results = new ArrayList<Activity>();
         while (solver.solve()) {
             solutionCount++;
             System.out.println("Solution " + solutionCount + " trouvée :");
             for (int i = 0; i < activities.size(); i++) {
+
+
                 Activity activity = activities.get(i);
                 System.out.print(activity.getName() + " -> ");
 
@@ -188,6 +197,7 @@ private final DependanceActivityService dependanceActivityService;
                     if (employerAssignment[i][j].getValue() == 1) {
                         System.out.print("Employer: " + employers.get(j).getFirstName() + ", ");
                         hasEmployers = true;
+                        activity.setEmployees((List.of(employers.get(j))));
                     }
                 }
 
@@ -197,6 +207,7 @@ private final DependanceActivityService dependanceActivityService;
                     if (machineAssignment[i][k].getValue() == 1) {
                         System.out.print("Machine: " + machines.get(k).getName() + ", ");
                         hasMachines = true;
+                        activity.setMachine(machines.get(k));
                     }
                 }
 
@@ -207,18 +218,26 @@ private final DependanceActivityService dependanceActivityService;
 
                 // Dates de début et de fin
                 System.out.println("[Start: " + startDates[i].getValue() + ", End: " + endDates[i].getValue() + "]");
+
+                activity.setPlannedStartDate( new Date (startDates[i].getValue()).toInstant().atZone(ZoneId.systemDefault())
+                  .toLocalDateTime());
+                    activity.setPlannedEndDate( new Date (endDates[i].getValue()).toInstant().atZone(ZoneId.systemDefault())
+                         .toLocalDateTime());
+                    results.add(activity);
             }
 
             // Durée totale d'exécution
             System.out.println("Durée totale d'exécution : " + totalDuration.getValue() + " heures");
+            System.out.println(results);
+
         }
 
         if (solutionCount == 0) {
             System.out.println("Aucune solution trouvée. Vérifiez les contraintes et les données.");
-            return false; // Retourne false s'il n'y a aucune solution
+            return results;
         }
 
-        return true; // Retourne true si au moins une solution est trouvée
+       return results;
     }
 }
 

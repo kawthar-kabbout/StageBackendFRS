@@ -6,6 +6,7 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
+@ToString
 //@EqualsAndHashCode (of = "name")
 @NoArgsConstructor
 public class Project {

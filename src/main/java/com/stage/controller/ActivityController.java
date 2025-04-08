@@ -2,11 +2,13 @@ package com.stage.controller;
 
 import com.stage.dto.ActivityDTO;
 import com.stage.persistans.Activity;
+import com.stage.persistans.Project;
 import com.stage.persistans.enums.StatutActivity;
 import com.stage.persistans.enums.ActivityType;
 import com.stage.services.ActivityService;
 import com.stage.services.ProjectService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +18,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/activities")
-
+@RequiredArgsConstructor
 public class ActivityController {
-    @Autowired
-    private ActivityService activityService;
-    private ProjectService projectService;
+    private  final ActivityService activityService;
+    private final  ProjectService projectService;
 
 
     @PostMapping
@@ -121,5 +122,19 @@ public class ActivityController {
     }
 
 
+
+    @GetMapping("/activitesNoChildren/{id}")
+    public ResponseEntity<List<ActivityDTO>> getActivitesNoChildren(@PathVariable Long id) {
+        Optional<Project> project = projectService.getProjectById(id);
+        if (project.isPresent()) {
+
+                if (activityService.getProjectWBSStructure(id) != null) {
+                    List<ActivityDTO> wbsStructure = activityService.getActivitesHasNoChildren(project.get().getId());
+                    return ResponseEntity.ok(wbsStructure);
+                }
+            }
+
+        return ResponseEntity.notFound().build();
+    }
 
 }

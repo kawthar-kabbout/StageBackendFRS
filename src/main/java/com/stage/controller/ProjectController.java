@@ -125,15 +125,13 @@ public ResponseEntity<Project> getProjectByName(@PathVariable String name) {
     }
 
     @GetMapping("/solveNewProject/{newProjectId}")
-    public ResponseEntity<String> solveNewProject(@PathVariable Long newProjectId) {
+    public ResponseEntity<List<Activity>> solveNewProject(@PathVariable Long newProjectId) {
         // Appel du service pour résoudre le projet
-        boolean isSolved = chocosolverService.chocosolver(newProjectId);
+        List<Activity> result = chocosolverService.chocosolver(newProjectId);
 
-        // Retourner une réponse HTTP basée sur le résultat
-        if (isSolved) {
-            return ResponseEntity.ok("Le projet avec l'ID " + newProjectId + " a été résolu avec succès.");
-        } else {
-            return ResponseEntity.badRequest().body("Échec de la résolution du projet avec l'ID " + newProjectId);
+        if (result == null || result.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(result);
     }
 }

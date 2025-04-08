@@ -37,7 +37,7 @@ public class ActivityDTO {
     private Map<Long, String> successorActivity;
     private List<ActivityDTO> childActivities;
     private List<Employer>employees ;
-    private List<Machine>machines;
+    private Machine machine;
 
 
 
