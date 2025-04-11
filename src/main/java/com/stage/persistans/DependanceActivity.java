@@ -30,9 +30,10 @@ public class DependanceActivity {
     @Column(nullable = false)
     private DependencyType dependencyType;
     private int delay;
-    public DependanceActivity(Activity activity3, Activity activity2, DependencyType dependencyType) {
+
+    public DependanceActivity(Activity targetActivity, Activity predecessorActivity, DependencyType dependencyType) {
+        this.targetActivity = targetActivity;
+        this.predecessorActivity = predecessorActivity;
+        this.dependencyType = dependencyType;
     }
-
-
-
 }

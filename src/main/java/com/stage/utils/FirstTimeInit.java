@@ -58,28 +58,50 @@ public class FirstTimeInit implements CommandLineRunner {
             // Création des employeurs (employers)
             Employer employer1 = null;
             Employer employer2 = null;
+            Employer employer3 = null;
+            Employer employer4 = null;
 
             if (employerRepository.count() == 0 && s1 != null && s2 != null) {
                 employer1 = new Employer();
-                employer1.setFirstName("John");
-                employer1.setLastName("Doe");
-                employer1.setPhone("1234567890");
+                employer1.setFirstName("employer1");
+                employer1.setLastName("employer1");
+                employer1.setPhone("1234555567890");
                 employer1.setAddress("123 Main St");
                 employer1.setGrade("Senior");
                 employer1.setSkills(List.of(s1));
                 employer1.setCapabilityMachine(List.of(c1));
 
                 employer2 = new Employer();
-                employer2.setFirstName("Bob");
-                employer2.setLastName("Smith");
-                employer2.setPhone("0987654321");
+                employer2.setFirstName("employer2");
+                employer2.setLastName("employer2");
+                employer2.setPhone("09876543244441");
                 employer2.setAddress("456 Elm St");
                 employer2.setGrade("Junior");
-                employer2.setSkills(List.of(s2));
-                employer2.setCapabilityMachine(List.of(c2));
+                employer2.setSkills(List.of(s2,s1));
+                employer2.setCapabilityMachine(List.of(c2,c1));
 
+
+                employer3 = new Employer();
+                employer3.setFirstName("employer3");
+                employer3.setLastName("employer3");
+                employer3.setPhone("0987654321");
+                employer3.setAddress("456 Elm St");
+                employer3.setGrade("Junior");
+                employer3.setSkills(List.of(s2));
+                employer3.setCapabilityMachine(List.of(c2));
+
+                employer4 = new Employer();
+                employer4.setFirstName("employer3");
+                employer4.setLastName("employer3");
+                employer4.setPhone("0987654326584981");
+                employer4.setAddress("456 Elm St");
+                employer4.setGrade("Junior");
+                employer4.setSkills(List.of(s2,s1));
+                employer4.setCapabilityMachine(List.of(c2,c1));
                 employerRepository.save(employer1);
                 employerRepository.save(employer2);
+                employerRepository.save(employer3);
+                employerRepository.save(employer4);
             }
 
             // Création des machines
@@ -148,9 +170,9 @@ public class FirstTimeInit implements CommandLineRunner {
             }
         }
 
-      // Création des dépendances entre activités
-   /*     if (activity1 != null && activity2 != null && activity3 != null && activity4 != null && activity5 != null) {
-            // Vérification que les activités existent avant de créer les dépendances
+
+       if (activity1 != null && activity2 != null && activity3 != null && activity4 != null && activity5 != null) {
+
             if (activity3.getId() != null && activity2.getId() != null) {
                 DependanceActivity d1 = new DependanceActivity(activity3, activity2, DependencyType.FS);
                 dependanceActivityRepository.save(d1);
@@ -165,7 +187,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 DependanceActivity d3 = new DependanceActivity(activity3, activity5, DependencyType.SS);
                 dependanceActivityRepository.save(d3);
             }
-        }*/
+        }
     }
 
     }

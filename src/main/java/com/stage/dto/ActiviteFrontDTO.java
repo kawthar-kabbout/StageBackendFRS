@@ -22,4 +22,6 @@ public class ActiviteFrontDTO {
     private boolean isParent;
     private List<Employer>employers ;
     private List<Machine>machines;
+    private int employersNumber;
+
 }

@@ -38,6 +38,7 @@ public class ActivityDTO {
     private List<ActivityDTO> childActivities;
     private List<Employer>employees ;
     private Machine machine;
+    private int employersNumber;
 
 
 

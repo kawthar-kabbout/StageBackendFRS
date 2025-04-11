@@ -114,7 +114,8 @@ return  activityRepository.countByProjectId(id);
                 findSuccessorActivities(activity.getId()),
                 new ArrayList<>(),
                 activity.getEmployees()!=null?activity.getEmployees().stream().toList():null,
-                activity.getMachine()
+                activity.getMachine(),
+                activity.getEmployersNumber()
         );
         List<Activity> childrenActivities = activityRepository.findByParentActivity(activity);
         if (!childrenActivities.isEmpty()) {
@@ -228,7 +229,7 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject,
                 .activityTemplateId(oldActivity.getId())
                 .machine(null)
                 .employees(null)
-                .employersNumber(1)
+                .employersNumber(dto.getEmployersNumber())
                 .build();
 
         newActivity = createActivity(newActivity);

@@ -53,4 +53,16 @@ public class ProjectService {
         }
         return newProject;
     }
+
+
+    public boolean existingProjects(List<Project> projects) {
+
+
+        for (Project project : projects) {
+            if (projectRepository.findById(project.getId()).isEmpty()) {
+                return false;
+            }
+        }return true;
+    }
+
 }

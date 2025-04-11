@@ -1,5 +1,6 @@
 package com.stage.services;
 
+import com.stage.dto.ActiviteFrontDTO;
 import com.stage.persistans.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,21 @@ private final ActivityService activityService;
 private final MachineService machineService;
 private final DependanceActivityService dependanceActivityService;
 
-    public List <Activity>chocosolver(Long projectId) {
+    public List <Activity>chocosolver(List<Project> projects) {
         // Récupération des données initiales
         List<Employer> employers = employerService.findAll();
-        List<Activity> activities = activityService.getActivitiesByProjectId(projectId);
-        List<DependanceActivity> deps = dependanceActivityService.getDependenceActivitiesByProjectId(projectId);
+       // List<Activity> activities = activityService.getActivitiesByProjectId(projectId);
+       // List<DependanceActivity> deps = dependanceActivityService.getDependenceActivitiesByProjectId(projectId);
         List<Machine> machines = machineService.findAll();
+
+    List<Activity>activities = new ArrayList<>();
+    List<DependanceActivity>deps =new ArrayList<>();
+        for (Project project : projects) {
+            activities.addAll(activityService.getActivitiesByProjectId(project.getId()));
+            deps.addAll(dependanceActivityService.getDependenceActivitiesByProjectId(project.getId()));
+        }
+
+
 
         // Initialisation du modèle Choco Solver
         Model model = new Model("Activity Assignment Problem with Employers and Machines");
@@ -47,13 +57,21 @@ private final DependanceActivityService dependanceActivityService;
             }
         }
 
+
         // Variables pour les dates de début et de fin des activités
         IntVar[] startDates = new IntVar[activities.size()];
         IntVar[] endDates = new IntVar[activities.size()];
         for (int i = 0; i < activities.size(); i++) {
             startDates[i] = model.intVar("start_" + activities.get(i).getName(), 0, 2160);
             endDates[i] = model.intVar("end_" + activities.get(i).getName(), 0, 2160);
-            model.arithm(endDates[i], ">=", startDates[i], "+", activities.get(i).getDuration()).post();
+
+            // Condition : Si la durée de l'activité est 0, alors startDate == endDate
+            if (activities.get(i).getDuration() == 0) {
+                model.arithm(startDates[i], "=", endDates[i]).post();
+            } else {
+                // Sinon, appliquer la contrainte habituelle
+                model.arithm(endDates[i], ">=", startDates[i], "+", activities.get(i).getDuration()).post();
+            }
         }
 
         // Contraintes principales
@@ -172,6 +190,7 @@ private final DependanceActivityService dependanceActivityService;
         // Variable pour la durée totale d'exécution
         IntVar totalDuration = model.intVar("totalDuration", 0, 2160);
         model.max(totalDuration, endDates).post();
+
 
         // Objectif : Minimiser la durée totale d'exécution
         model.setObjective(Model.MINIMIZE, totalDuration);

@@ -124,10 +124,13 @@ public ResponseEntity<Project> getProjectByName(@PathVariable String name) {
         return ResponseEntity.ok(newActivitiesDTO);
     }
 
-    @GetMapping("/solveNewProject/{newProjectId}")
-    public ResponseEntity<List<Activity>> solveNewProject(@PathVariable Long newProjectId) {
-        // Appel du service pour résoudre le projet
-        List<Activity> result = chocosolverService.chocosolver(newProjectId);
+    @GetMapping("/solve/projects")
+    public ResponseEntity<List<Activity>> solveNewProject(@RequestBody List<Project> projects) {
+      if (!projectService.existingProjects(projects)){
+          return ResponseEntity.notFound().build();
+
+      }
+        List<Activity> result = chocosolverService.chocosolver(projects);
 
         if (result == null || result.isEmpty()) {
             return ResponseEntity.notFound().build();
