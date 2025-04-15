@@ -18,6 +18,9 @@ public interface DependanceActivityRepository extends JpaRepository<DependanceAc
         int countByTargetAndPredecessorNative(Long targetActivityId, Long predecessorActivityId);
 
 
+    DependanceActivity findByTargetActivityAndPredecessorActivity(Activity targetActivity, Activity predecessorActivity);
+
+
 }
 
 

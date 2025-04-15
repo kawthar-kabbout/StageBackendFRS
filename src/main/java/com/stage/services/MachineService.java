@@ -1,13 +1,16 @@
 package com.stage.services;
 
 
+import com.stage.dto.MachineDTO;
 import com.stage.persistans.Machine;
 import com.stage.persistans.enums.ActivityType;
 import com.stage.persistans.enums.MachineType;
+import com.stage.repositories.ActivityRepository;
 import com.stage.repositories.MachineRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MachineService {
     private final MachineRepository machineRepository;
+    private final ActivityService activityService;
 
 
 
@@ -35,6 +39,29 @@ public class MachineService {
         machineRepository.delete(machine);
     }
 
+    public MachineDTO getMachineDTo (Machine machine) {
+        MachineDTO machineDTO = new MachineDTO(
+                machine.getId(),
+                machine.getName(),
+                machine.getCapabilityMachines()
+        );
+        if (activityService.getMachineActivitiesNotFinish(machine)!= null) {
+            machineDTO.setActivitiesNotFinish( activityService.getMachineActivitiesNotFinish(machine));
+        }
+
+        return machineDTO;
+    }
+
+    public List<MachineDTO> getALlMachineDTO () {
+
+        List<MachineDTO> machineDTOs = new ArrayList<>();
+        List<Machine> machines = machineRepository.findAll();
+        for (Machine m : machines) {
+            MachineDTO machineDTO = this.getMachineDTo(m);
+            machineDTOs.add(machineDTO);
+        }
+        return machineDTOs;
+    }
 
 
     public Machine update(Long id, Machine machine) {

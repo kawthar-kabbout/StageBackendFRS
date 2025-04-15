@@ -1,14 +1,15 @@
 package com.stage.services;
 
-import com.stage.dto.ActiviteFrontDTO;
+import com.stage.dto.EmployerDTo;
+import com.stage.dto.MachineDTO;
 import com.stage.persistans.*;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,12 +23,16 @@ private final ActivityService activityService;
 private final MachineService machineService;
 private final DependanceActivityService dependanceActivityService;
 
-    public List <Activity>chocosolver(List<Project> projects) {
+    public List <Activity>chocosolver(List<Project> projects, LocalDateTime startPlanning) {
+
+        System.out.println("startPlanning" +startPlanning);
+
+
         // Récupération des données initiales
-        List<Employer> employers = employerService.findAll();
+        List<EmployerDTo> employers = employerService.getALLEmployerDTO();
        // List<Activity> activities = activityService.getActivitiesByProjectId(projectId);
        // List<DependanceActivity> deps = dependanceActivityService.getDependenceActivitiesByProjectId(projectId);
-        List<Machine> machines = machineService.findAll();
+        List<MachineDTO> machines = machineService.getALlMachineDTO();
 
     List<Activity>activities = new ArrayList<>();
     List<DependanceActivity>deps =new ArrayList<>();
@@ -99,7 +104,7 @@ private final DependanceActivityService dependanceActivityService;
                 boolean canAssignEmployers = false;
                 model.sum(employerAssignment[i], "=", activity.getEmployersNumber()).post(); // Nombre exact d'employeurs requis
                 for (int j = 0; j < employers.size(); j++) {
-                    Employer employer = employers.get(j);
+                    EmployerDTo employer = employers.get(j);
                     if (employer.getSkills().stream().noneMatch(skill -> skill.getId().equals(requiredSkill.getId()))) {
                         // L'employeur n'a pas la compétence requise
                         model.arithm(employerAssignment[i][j], "=", 0).post();
@@ -113,8 +118,8 @@ private final DependanceActivityService dependanceActivityService;
                     boolean canAssignMachines = false;
                     model.sum(machineAssignment[i], "=", 1).post(); // Une seule machine peut être affectée
                     for (int k = 0; k < machines.size(); k++) {
-                        Machine machine = machines.get(k);
-                        if (machine.getCapabilityMachines().stream().noneMatch(cap -> cap.getId().equals(requiredCapability.getId()))) {
+                        MachineDTO machine = machines.get(k);
+                        if (machine.getCapabilityMachine().stream().noneMatch(cap -> cap.getId().equals(requiredCapability.getId()))) {
                             // La machine n'a pas la capacité requise
                             model.arithm(machineAssignment[i][k], "=", 0).post();
                         } else {
@@ -216,7 +221,7 @@ private final DependanceActivityService dependanceActivityService;
                     if (employerAssignment[i][j].getValue() == 1) {
                         System.out.print("Employer: " + employers.get(j).getFirstName() + ", ");
                         hasEmployers = true;
-                        activity.setEmployees((List.of(employers.get(j))));
+                        activity.setEmployees((List.of(employerService.findById(employers.get(j).getId()).get())));
                     }
                 }
 
@@ -226,7 +231,7 @@ private final DependanceActivityService dependanceActivityService;
                     if (machineAssignment[i][k].getValue() == 1) {
                         System.out.print("Machine: " + machines.get(k).getName() + ", ");
                         hasMachines = true;
-                        activity.setMachine(machines.get(k));
+                        activity.setMachine(machineService.findById(machines.get(k).getId()).get());
                     }
                 }
 
@@ -238,10 +243,8 @@ private final DependanceActivityService dependanceActivityService;
                 // Dates de début et de fin
                 System.out.println("[Start: " + startDates[i].getValue() + ", End: " + endDates[i].getValue() + "]");
 
-                activity.setPlannedStartDate( new Date (startDates[i].getValue()).toInstant().atZone(ZoneId.systemDefault())
-                  .toLocalDateTime());
-                    activity.setPlannedEndDate( new Date (endDates[i].getValue()).toInstant().atZone(ZoneId.systemDefault())
-                         .toLocalDateTime());
+                activity.setPlannedStartDate(startPlanning.plusHours(startDates[i].getValue()) );
+                    activity.setPlannedEndDate( startPlanning.plusHours(endDates[i].getValue()));
                     results.add(activity);
             }
 

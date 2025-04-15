@@ -37,7 +37,13 @@ public class DependanceActivityService {
     }
 
 
+public DependanceActivity findByTargetAndProdesesseur( Activity targetActivity, Activity predecessorActivity) {
 
+        DependanceActivity result =dependanceActivityRepository.findByTargetActivityAndPredecessorActivity(targetActivity,predecessorActivity);
+
+            return result;
+
+}
 
     public DependanceActivity save(DependanceActivity modelDependanceActivity) {
         if (modelDependanceActivity.getTargetActivity().getId() != modelDependanceActivity.getPredecessorActivity().getId()
@@ -68,17 +74,7 @@ public class DependanceActivityService {
 
 
     public DependanceActivity update(DependanceActivity modelDependanceActivity) {
-        // Vérifier si targetActivity exist
-        if (modelDependanceActivity.getTargetActivity() != null &&
-                activityRepository.findByName(modelDependanceActivity.getTargetActivity().getName()).isEmpty()) {
-            throw new IllegalArgumentException("L'activité cible n'existe pas.");
-        }
 
-        // Vérifier si predecessorActivity exist
-        if (modelDependanceActivity.getPredecessorActivity() != null &&
-                activityRepository.findByName(modelDependanceActivity.getPredecessorActivity().getName()).isEmpty()) {
-            throw new IllegalArgumentException("L'activité prédécesseur n'existe pas.");
-        }
         return dependanceActivityRepository.save(modelDependanceActivity);
     }
     public void deleteById(Long id) {

@@ -3,6 +3,7 @@ package com.stage.services;
 
 import com.stage.dto.ActiviteFrontDTO;
 import com.stage.dto.ActivityDTO;
+import com.stage.dto.EmployerDTo;
 import com.stage.persistans.*;
 import com.stage.persistans.enums.StatutActivity;
 import com.stage.persistans.enums.ActivityType;
@@ -192,9 +193,35 @@ return  activityRepository.countByProjectId(id);
         return successorMap;
     }
 
-   
 
 
+    public List<Activity>getEmployerActivitiesNotFinish(Employer employer) {
+        List<Activity> activities = activityRepository.findAll();
+        List<Activity> result = new ArrayList<>();
+        for (Activity activity : activities) {
+            if(activity.getEmployees()!=null){
+            for (Employer e :activity.getEmployees()){
+                if (employer.getId().equals(e.getId()) && activity.getStatut() != StatutActivity.Finish)
+                        result.add(activity);
+
+            }
+        }}
+        return result;
+    }
+
+    public List<Activity>getMachineActivitiesNotFinish(Machine machine ) {
+        List<Activity> activities = activityRepository.findAll();
+        List<Activity> result = new ArrayList<>();
+        for (Activity activity : activities) {
+            if(activity.getMachine()!=null
+            && machine.getId().equals(activity.getMachine().getId())
+                    && activity.getStatut()!=StatutActivity.Finish)
+
+               result.add(activity);
+
+        }
+        return result;
+    }
 
 
 public void cloneActivityProjectRootTree(Project oldProject, Project newProject,List<ActiviteFrontDTO> activitesFrontDTO) {

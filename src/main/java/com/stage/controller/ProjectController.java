@@ -15,6 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -124,17 +129,36 @@ public ResponseEntity<Project> getProjectByName(@PathVariable String name) {
         return ResponseEntity.ok(newActivitiesDTO);
     }
 
-    @GetMapping("/solve/projects")
-    public ResponseEntity<List<Activity>> solveNewProject(@RequestBody List<Project> projects) {
-      if (!projectService.existingProjects(projects)){
-          return ResponseEntity.notFound().build();
+    @PostMapping("/solve/projects/{startPlanning}")
+    public ResponseEntity<List<Activity>> solveNewProject(
+            @PathVariable Long startPlanning ,
+            @RequestBody List<Project> projects) {
 
-      }
-        List<Activity> result = chocosolverService.chocosolver(projects);
 
+        System.out.println("");
+        System.out.println("");
+        System.out.println("LocalDateTime: " + startPlanning);
+      Long   startPlanning2=startPlanning*1000;
+        LocalDateTime localDateTimePlannig  = Instant.ofEpochMilli(startPlanning2)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        System.out.println("LocalDateTime: " + localDateTimePlannig);
+
+        // Validate that the projects exist
+        if (!projectService.existingProjects(projects)) {
+            return ResponseEntity.notFound().build();
+        }
+
+
+        // Solve the projects using the Choco solver
+        List<Activity> result = chocosolverService.chocosolver(projects,localDateTimePlannig);
+
+        // Check if the result is valid
         if (result == null || result.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
         return ResponseEntity.ok(result);
     }
 }
