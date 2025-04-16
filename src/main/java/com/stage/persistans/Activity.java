@@ -39,7 +39,7 @@ public class Activity {
     @ManyToOne
     private Activity parentActivity;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER )
     private List<Employer> employees = new ArrayList<>();
 
     @ManyToOne

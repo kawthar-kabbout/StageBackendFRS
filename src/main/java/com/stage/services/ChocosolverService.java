@@ -9,11 +9,14 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Service
 public class ChocosolverService {
@@ -23,25 +26,19 @@ private final ActivityService activityService;
 private final MachineService machineService;
 private final DependanceActivityService dependanceActivityService;
 
-    public List <Activity>chocosolver(List<Project> projects, LocalDateTime startPlanning) {
-
-        System.out.println("startPlanning" +startPlanning);
-
+    public List<Activity> chocosolver(List<Project> projects, LocalDateTime startPlanning) {
+        System.out.println("startPlanning: " + startPlanning);
 
         // Récupération des données initiales
         List<EmployerDTo> employers = employerService.getALLEmployerDTO();
-       // List<Activity> activities = activityService.getActivitiesByProjectId(projectId);
-       // List<DependanceActivity> deps = dependanceActivityService.getDependenceActivitiesByProjectId(projectId);
         List<MachineDTO> machines = machineService.getALlMachineDTO();
+        List<Activity> activities = new ArrayList<>();
+        List<DependanceActivity> deps = new ArrayList<>();
 
-    List<Activity>activities = new ArrayList<>();
-    List<DependanceActivity>deps =new ArrayList<>();
         for (Project project : projects) {
             activities.addAll(activityService.getActivitiesByProjectId(project.getId()));
             deps.addAll(dependanceActivityService.getDependenceActivitiesByProjectId(project.getId()));
         }
-
-
 
         // Initialisation du modèle Choco Solver
         Model model = new Model("Activity Assignment Problem with Employers and Machines");
@@ -62,7 +59,6 @@ private final DependanceActivityService dependanceActivityService;
             }
         }
 
-
         // Variables pour les dates de début et de fin des activités
         IntVar[] startDates = new IntVar[activities.size()];
         IntVar[] endDates = new IntVar[activities.size()];
@@ -74,9 +70,20 @@ private final DependanceActivityService dependanceActivityService;
             if (activities.get(i).getDuration() == 0) {
                 model.arithm(startDates[i], "=", endDates[i]).post();
             } else {
-                // Sinon, appliquer la contrainte habituelle
                 model.arithm(endDates[i], ">=", startDates[i], "+", activities.get(i).getDuration()).post();
             }
+        }
+
+        // Calcul des dates de fin maximales pour chaque employé
+        int[] maxExistingEnds = new int[employers.size()];
+        for (int j = 0; j < employers.size(); j++) {
+            EmployerDTo employer = employers.get(j);
+            long maxEnd = employer.getActivitiesNotFinish().stream()
+                    .map(Activity::getPlannedEndDate)
+                    .mapToLong(endDate -> Duration.between(startPlanning, endDate).toHours())
+                    .max()
+                    .orElse(-1); // -1 si l'employé n'a pas d'activités existantes
+            maxExistingEnds[j] = (int) maxEnd;
         }
 
         // Contraintes principales
@@ -85,10 +92,6 @@ private final DependanceActivityService dependanceActivityService;
 
             // Condition 1 : Si l'activité n'a pas de compétence (Skill == null)
             if (activity.getSkill() == null) {
-                // Aucun employeur ni machine ne doit être affecté
-                System.out.println("skill" +activity.getSkill());
-
-
                 for (int j = 0; j < employers.size(); j++) {
                     model.arithm(employerAssignment[i][j], "=", 0).post();
                 }
@@ -106,10 +109,17 @@ private final DependanceActivityService dependanceActivityService;
                 for (int j = 0; j < employers.size(); j++) {
                     EmployerDTo employer = employers.get(j);
                     if (employer.getSkills().stream().noneMatch(skill -> skill.getId().equals(requiredSkill.getId()))) {
-                        // L'employeur n'a pas la compétence requise
                         model.arithm(employerAssignment[i][j], "=", 0).post();
                     } else {
                         canAssignEmployers = true;
+
+                        // Contrainte de disponibilité individuelle
+                        if (maxExistingEnds[j] >= 0) {
+                            model.ifThen(
+                                    model.arithm(employerAssignment[i][j], "=", 1),
+                                    model.arithm(startDates[i], ">=", maxExistingEnds[j])
+                            );
+                        }
                     }
                 }
 
@@ -120,21 +130,17 @@ private final DependanceActivityService dependanceActivityService;
                     for (int k = 0; k < machines.size(); k++) {
                         MachineDTO machine = machines.get(k);
                         if (machine.getCapabilityMachine().stream().noneMatch(cap -> cap.getId().equals(requiredCapability.getId()))) {
-                            // La machine n'a pas la capacité requise
                             model.arithm(machineAssignment[i][k], "=", 0).post();
                         } else {
                             canAssignMachines = true;
                         }
                     }
-
-                    // Si aucune machine compatible n'est trouvée, désactiver l'affectation
                     if (!canAssignMachines) {
                         for (int k = 0; k < machines.size(); k++) {
                             model.arithm(machineAssignment[i][k], "=", 0).post();
                         }
                     }
                 } else {
-                    // Si l'activité n'a pas de CapabilityWithMachine, aucune machine ne doit être affectée
                     for (int k = 0; k < machines.size(); k++) {
                         model.arithm(machineAssignment[i][k], "=", 0).post();
                     }
@@ -167,7 +173,6 @@ private final DependanceActivityService dependanceActivityService;
             }
         }
 
-
         // Contraintes de dépendance des tâches
         for (int i = 0; i < deps.size(); i++) {
             if (deps.get(i).getDependencyType().equals("FS")) {
@@ -190,12 +195,38 @@ private final DependanceActivityService dependanceActivityService;
         }
 
 
+        // Contrainte : startDate >= max(maxExistingEnds[j] pour les employés affectés)
+        for (int i = 0; i < activities.size(); i++) {
+            IntVar[] assignedEmployers = new IntVar[employers.size()];
+            for (int j = 0; j < employers.size(); j++) {
+                assignedEmployers[j] = employerAssignment[i][j];
+            }
+
+            // Variable pour stocker le maximum des dates de fin existantes des employés affectés
+            IntVar maxEndVar = model.intVar("maxEnd_" + i, 0, 2160);
+
+            // Contrainte : maxEndVar doit être >= maxExistingEnds[j] pour chaque employé affecté
+            for (int j = 0; j < employers.size(); j++) {
+                model.ifThen(
+                        model.arithm(employerAssignment[i][j], "=", 1), // Si l'employé est affecté
+                        model.arithm(maxEndVar, ">=", maxExistingEnds[j]) // Alors maxEndVar >= sa date de fin existante
+                );
+            }
+
+            // Contrainte : startDate[i] >= maxEndVar
+            model.ifThen(
+                    model.sum(assignedEmployers, "=", activities.get(i).getEmployersNumber()), // Si le nombre requis d'employés est affecté
+                    model.arithm(startDates[i], ">=", maxEndVar) // Alors startDate[i] >= maxEndVar
+            );
+        }
+
+
+
 
 
         // Variable pour la durée totale d'exécution
         IntVar totalDuration = model.intVar("totalDuration", 0, 2160);
         model.max(totalDuration, endDates).post();
-
 
         // Objectif : Minimiser la durée totale d'exécution
         model.setObjective(Model.MINIMIZE, totalDuration);
@@ -204,70 +235,88 @@ private final DependanceActivityService dependanceActivityService;
         System.out.println("Recherche de la meilleure solution...");
         Solver solver = model.getSolver();
         solver.limitSolution(100); // Limite à 10 solutions
+
         int solutionCount = 0;
-         List<Activity>results = new ArrayList<Activity>();
+        List<Activity> results = new ArrayList<>();
+        int bestTotalDuration = Integer.MAX_VALUE;
+
         while (solver.solve()) {
             solutionCount++;
             System.out.println("Solution " + solutionCount + " trouvée :");
-            for (int i = 0; i < activities.size(); i++) {
 
+            if (solutionCount == 1 || totalDuration.getValue() < bestTotalDuration) {
+                results.clear();
+                for (int i = 0; i < activities.size(); i++) {
+                    Activity activity = activities.get(i);
 
-                Activity activity = activities.get(i);
-                System.out.print(activity.getName() + " -> ");
+                    // Affichage du nom de l'activité
+                    System.out.print("Activité : " + activity.getName() + " -> ");
 
-                // Affichage des employeurs affectés
-                boolean hasEmployers = false;
-                for (int j = 0; j < employers.size(); j++) {
-                    if (employerAssignment[i][j].getValue() == 1) {
-                        System.out.print("Employer: " + employers.get(j).getFirstName() + ", ");
-                        hasEmployers = true;
-                        activity.setEmployees((List.of(employerService.findById(employers.get(j).getId()).get())));
+                    // Mise à jour et affichage des employés affectés
+                    boolean hasEmployers = false;
+                    for (int j = 0; j < employers.size(); j++) {
+                        if (employerAssignment[i][j].getValue() == 1) {
+                            Optional<Employer> employerOpt = employerService.findById(employers.get(j).getId());
+                            employerOpt.ifPresentOrElse(
+                                    emp -> {
+                                        activity.setEmployees(new ArrayList<>(List.of(emp)));
+                                        System.out.print("Employé: " + emp.getFirstName() + ", ");
+                                    },
+                                    () -> { throw new RuntimeException("Employé non trouvé"); }
+                            );
+                            hasEmployers = true;
+                        }
                     }
-                }
 
-                // Affichage des machines affectées
-                boolean hasMachines = false;
-                for (int k = 0; k < machines.size(); k++) {
-                    if (machineAssignment[i][k].getValue() == 1) {
-                        System.out.print("Machine: " + machines.get(k).getName() + ", ");
-                        hasMachines = true;
-                        activity.setMachine(machineService.findById(machines.get(k).getId()).get());
+                    // Mise à jour et affichage des machines affectées
+                    boolean hasMachines = false;
+                    for (int k = 0; k < machines.size(); k++) {
+                        if (machineAssignment[i][k].getValue() == 1) {
+                            Optional<Machine> machineOpt = machineService.findById(machines.get(k).getId());
+                            machineOpt.ifPresentOrElse(
+                                    machine -> {
+                                        activity.setMachine(machine);
+                                        System.out.print("Machine: " + machine.getName() + ", ");
+                                    },
+                                    () -> { throw new RuntimeException("Machine non trouvée"); }
+                            );
+                            hasMachines = true;
+                        }
                     }
-                }
 
-                // Si aucun employeur ni machine n'est affecté
-                if (!hasEmployers && !hasMachines) {
-                    System.out.print("Pas d'employeurs et machines attribués, ");
-                }
+                    // Si aucun employeur ni machine n'est affecté
+                    if (!hasEmployers && !hasMachines) {
+                        System.out.print("Pas d'employeurs ni de machines attribués, ");
+                    }
 
-                // Dates de début et de fin
-                System.out.println("[Start: " + startDates[i].getValue() + ", End: " + endDates[i].getValue() + "]");
+                    // Mise à jour des dates planifiées
+                    activity.setPlannedStartDate(startPlanning.plusHours(startDates[i].getValue()));
+                    activity.setPlannedEndDate(startPlanning.plusHours(endDates[i].getValue()));
 
-                activity.setPlannedStartDate(startPlanning.plusHours(startDates[i].getValue()) );
-                    activity.setPlannedEndDate( startPlanning.plusHours(endDates[i].getValue()));
+                    // Affichage des dates de début et de fin
+                    System.out.println("[Start: " + startDates[i].getValue() + ", End: " + endDates[i].getValue() + "]");
+
+                    // Ajout de l'activité aux résultats
                     results.add(activity);
+                    activityService.updateActivity(activity);
+                 Optional<Activity>act=   activityService.getActivityById(activity.getId());
+                    if (act.isPresent()) {
+                        System.out.println(act);
+                    }
+                }
+
+                // Mise à jour de la meilleure durée totale
+                bestTotalDuration = totalDuration.getValue();
             }
 
-            // Durée totale d'exécution
+            // Affichage de la durée totale d'exécution
             System.out.println("Durée totale d'exécution : " + totalDuration.getValue() + " heures");
-            System.out.println(results);
-
         }
 
         if (solutionCount == 0) {
             System.out.println("Aucune solution trouvée. Vérifiez les contraintes et les données.");
-            return results;
         }
 
-       return results;
+        return results;
     }
 }
-
-
-
-
-
-
-
-
-

@@ -91,8 +91,8 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer3.setCapabilityMachine(List.of(c2));
 
                 employer4 = new Employer();
-                employer4.setFirstName("employer3");
-                employer4.setLastName("employer3");
+                employer4.setFirstName("employer4");
+                employer4.setLastName("employer4");
                 employer4.setPhone("0987654326584981");
                 employer4.setAddress("456 Elm St");
                 employer4.setGrade("Junior");
