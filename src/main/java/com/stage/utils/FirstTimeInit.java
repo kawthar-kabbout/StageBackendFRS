@@ -153,7 +153,7 @@ public class FirstTimeInit implements CommandLineRunner {
         if (modeleActivityRepository.count() == 0) {
             if (p1 != null && p2 != null && s1 != null && s2 != null) {
                 activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, c1, s1,90,1);
-                activity2 = new Activity("Activité 2", ActivityType.EXTERNE, p2, c1, s1,50,1);
+                activity2 = new Activity("Activité 2", ActivityType.EXTERNE, p2, c1, s1,50,3);
                 activity3 = new Activity("Activité 3", ActivityType.EXTERNE, p2, c2, s2,30,1);
                 activity4 = new Activity("Activité 4", ActivityType.EXTERNE, p2, null,s2,40,1);
                 activity5 = new Activity("Activité 5", ActivityType.SOUS_TRAITANCE, p2, null,null,10,0);
@@ -174,17 +174,17 @@ public class FirstTimeInit implements CommandLineRunner {
        if (activity1 != null && activity2 != null && activity3 != null && activity4 != null && activity5 != null) {
 
             if (activity3.getId() != null && activity2.getId() != null) {
-                DependanceActivity d1 = new DependanceActivity(activity3, activity2, DependencyType.FS);
+                DependanceActivity d1 = new DependanceActivity(activity3, activity2, DependencyType.FS,2);
                 dependanceActivityRepository.save(d1);
             }
 
             if (activity3.getId() != null && activity4.getId() != null) {
-                DependanceActivity d2 = new DependanceActivity(activity3, activity4, DependencyType.FS);
+                DependanceActivity d2 = new DependanceActivity(activity4,activity3, DependencyType.FS,1);
                 dependanceActivityRepository.save(d2);
             }
 
             if (activity3.getId() != null && activity5.getId() != null) {
-                DependanceActivity d3 = new DependanceActivity(activity3, activity5, DependencyType.SS);
+                DependanceActivity d3 = new DependanceActivity(activity5,activity3, DependencyType.SS,1);
                 dependanceActivityRepository.save(d3);
             }
         }

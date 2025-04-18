@@ -86,6 +86,29 @@ private final DependanceActivityService dependanceActivityService;
             maxExistingEnds[j] = (int) maxEnd;
         }
 
+        // Contraintes de dépendance des tâches
+        for (DependanceActivity dep : deps) {
+            int targetIndex = activities.indexOf(dep.getTargetActivity());
+            int predecessorIndex = activities.indexOf(dep.getPredecessorActivity());
+
+            switch (dep.getDependencyType()) {
+                case FS: // Finish-to-Start
+                    model.arithm(startDates[targetIndex], ">=", endDates[predecessorIndex], "+", dep.getDelay()).post();
+                    break;
+                case SS: // Start-to-Start
+                    model.arithm(startDates[targetIndex], ">=", startDates[predecessorIndex], "+", dep.getDelay()).post();
+                    break;
+                case FF: // Finish-to-Finish
+                    model.arithm(endDates[targetIndex], ">=", endDates[predecessorIndex], "+", dep.getDelay()).post();
+                    break;
+                case SF: // Start-to-Finish
+                    model.arithm(endDates[predecessorIndex], ">=", startDates[targetIndex], "+", dep.getDelay()).post();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Type de dépendance inconnu : " + dep.getDependencyType());
+            }
+        }
+
         // Contraintes principales
         for (int i = 0; i < activities.size(); i++) {
             Activity activity = activities.get(i);
@@ -106,6 +129,7 @@ private final DependanceActivityService dependanceActivityService;
                 // Contrainte sur les employeurs
                 boolean canAssignEmployers = false;
                 model.sum(employerAssignment[i], "=", activity.getEmployersNumber()).post(); // Nombre exact d'employeurs requis
+
                 for (int j = 0; j < employers.size(); j++) {
                     EmployerDTo employer = employers.get(j);
                     if (employer.getSkills().stream().noneMatch(skill -> skill.getId().equals(requiredSkill.getId()))) {
@@ -127,6 +151,7 @@ private final DependanceActivityService dependanceActivityService;
                 if (requiredCapability != null) {
                     boolean canAssignMachines = false;
                     model.sum(machineAssignment[i], "=", 1).post(); // Une seule machine peut être affectée
+
                     for (int k = 0; k < machines.size(); k++) {
                         MachineDTO machine = machines.get(k);
                         if (machine.getCapabilityMachine().stream().noneMatch(cap -> cap.getId().equals(requiredCapability.getId()))) {
@@ -135,6 +160,7 @@ private final DependanceActivityService dependanceActivityService;
                             canAssignMachines = true;
                         }
                     }
+
                     if (!canAssignMachines) {
                         for (int k = 0; k < machines.size(); k++) {
                             model.arithm(machineAssignment[i][k], "=", 0).post();
@@ -173,30 +199,9 @@ private final DependanceActivityService dependanceActivityService;
             }
         }
 
-        // Contraintes de dépendance des tâches
-        for (int i = 0; i < deps.size(); i++) {
-            if (deps.get(i).getDependencyType().equals("FS")) {
-                int targetIndex = activities.indexOf(deps.get(i).getTargetActivity());
-                int predecessorIndex = activities.indexOf(deps.get(i).getPredecessorActivity());
-                model.arithm(startDates[targetIndex], ">=", endDates[predecessorIndex], "+", deps.get(i).getDelay()).post();
-            } else if (deps.get(i).getDependencyType().equals("SS")) {
-                int targetIndex = activities.indexOf(deps.get(i).getTargetActivity());
-                int predecessorIndex = activities.indexOf(deps.get(i).getPredecessorActivity());
-                model.arithm(startDates[targetIndex], ">=", startDates[predecessorIndex], "+", deps.get(i).getDelay()).post();
-            } else if (deps.get(i).getDependencyType().equals("FF")) {
-                int targetIndex = activities.indexOf(deps.get(i).getTargetActivity());
-                int predecessorIndex = activities.indexOf(deps.get(i).getPredecessorActivity());
-                model.arithm(endDates[targetIndex], ">=", endDates[predecessorIndex], "+", deps.get(i).getDelay()).post();
-            } else if (deps.get(i).getDependencyType().equals("SF")) {
-                int targetIndex = activities.indexOf(deps.get(i).getTargetActivity());
-                int predecessorIndex = activities.indexOf(deps.get(i).getPredecessorActivity());
-                model.arithm(endDates[predecessorIndex], ">=", startDates[targetIndex], "+", deps.get(i).getDelay()).post();
-            }
-        }
-
-
         // Contrainte : startDate >= max(maxExistingEnds[j] pour les employés affectés)
         for (int i = 0; i < activities.size(); i++) {
+            Activity activity = activities.get(i);
             IntVar[] assignedEmployers = new IntVar[employers.size()];
             for (int j = 0; j < employers.size(); j++) {
                 assignedEmployers[j] = employerAssignment[i][j];
@@ -213,16 +218,21 @@ private final DependanceActivityService dependanceActivityService;
                 );
             }
 
-            // Contrainte : startDate[i] >= maxEndVar
-            model.ifThen(
-                    model.sum(assignedEmployers, "=", activities.get(i).getEmployersNumber()), // Si le nombre requis d'employés est affecté
-                    model.arithm(startDates[i], ">=", maxEndVar) // Alors startDate[i] >= maxEndVar
-            );
+            // Appliquer la contrainte uniquement si activity.getEmployersNumber() >= 2
+            if (activity.getEmployersNumber() >= 2) {
+                // Contrainte : startDate[i] == maxEndVar
+                model.ifThen(
+                        model.sum(assignedEmployers, "=", activity.getEmployersNumber()), // Si le nombre requis d'employés est affecté
+                        model.arithm(startDates[i], "=", maxEndVar) // Alors startDate[i] == maxEndVar
+                );
+            } else {
+                // Sinon, startDate[i] >= maxEndVar
+                model.ifThen(
+                        model.sum(assignedEmployers, "=", activity.getEmployersNumber()), // Si le nombre requis d'employés est affecté
+                        model.arithm(startDates[i], ">=", maxEndVar) // Alors startDate[i] >= maxEndVar
+                );
+            }
         }
-
-
-
-
 
         // Variable pour la durée totale d'exécution
         IntVar totalDuration = model.intVar("totalDuration", 0, 2160);
@@ -232,10 +242,12 @@ private final DependanceActivityService dependanceActivityService;
         model.setObjective(Model.MINIMIZE, totalDuration);
 
         // Résolution du modèle
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
         System.out.println("Recherche de la meilleure solution...");
         Solver solver = model.getSolver();
         solver.limitSolution(100); // Limite à 10 solutions
-
         int solutionCount = 0;
         List<Activity> results = new ArrayList<>();
         int bestTotalDuration = Integer.MAX_VALUE;
@@ -246,6 +258,7 @@ private final DependanceActivityService dependanceActivityService;
 
             if (solutionCount == 1 || totalDuration.getValue() < bestTotalDuration) {
                 results.clear();
+
                 for (int i = 0; i < activities.size(); i++) {
                     Activity activity = activities.get(i);
 
@@ -299,7 +312,8 @@ private final DependanceActivityService dependanceActivityService;
                     // Ajout de l'activité aux résultats
                     results.add(activity);
                     activityService.updateActivity(activity);
-                 Optional<Activity>act=   activityService.getActivityById(activity.getId());
+
+                    Optional<Activity> act = activityService.getActivityById(activity.getId());
                     if (act.isPresent()) {
                         System.out.println(act);
                     }

@@ -126,6 +126,7 @@ return resultActivitres;
                        .dependencyType(oldd.getDependencyType())
                        .targetActivity(newactivity)
                        .predecessorActivity(newProdecesseur)
+                       .delay(oldd.getDelay())
                        .build();
 
                dependanceActivityRepository.save(newDependanceActivity);

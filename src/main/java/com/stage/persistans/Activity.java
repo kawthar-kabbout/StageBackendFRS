@@ -75,6 +75,18 @@ public class Activity {
         this.employersNumber = employersNumber;
     }
 
+
+    public Activity(@NonNull String name, StatutActivity statut, ActivityType typeActivity, Skill skill, @NonNull Project project, CapabilityMachine capabilityMachine, int employersNumber, Integer duration) {
+        this.name = name;
+        this.statut = statut;
+        this.typeActivity = typeActivity;
+        this.skill = skill;
+        this.project = project;
+        this.capabilityMachine = capabilityMachine;
+        this.employersNumber = employersNumber;
+        this.duration = duration;
+    }
+
     public <E> Activity(String s, Activity activity1, ActivityType activityType, Project p2, List<E> s2) {
     }
 

@@ -36,4 +36,11 @@ public class DependanceActivity {
         this.predecessorActivity = predecessorActivity;
         this.dependencyType = dependencyType;
     }
+
+    public DependanceActivity(Activity targetActivity, Activity predecessorActivity, DependencyType dependencyType, int delay) {
+        this.targetActivity = targetActivity;
+        this.predecessorActivity = predecessorActivity;
+        this.dependencyType = dependencyType;
+        this.delay = delay;
+    }
 }
