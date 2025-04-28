@@ -1,6 +1,8 @@
 package com.stage.services;
 
 import com.stage.dto.ActiviteFrontDTO;
+import com.stage.dto.ProjetDTO;
+import com.stage.persistans.Activity;
 import com.stage.persistans.Project;
 import com.stage.repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +25,11 @@ public class ProjectService {
     public Optional<Project> getProjectById(Long id) {
         return projectRepository.findById(id);
     }
-    public Optional<Project> getProjectByName(String name) {
+    public Project getProjectByName(String name) {
 
-        return projectRepository.findByName(name);
+        if (projectRepository.findByName(name).isPresent()) {
+            return projectRepository.findByName(name).get();
+        }return null;
 
     }
     public Project save(Project project) {
@@ -63,6 +67,17 @@ public class ProjectService {
                 return false;
             }
         }return true;
+    }
+
+
+    public ProjetDTO getProjetDTOPalnification(Project project) {
+        ProjetDTO projetDTO = new ProjetDTO();
+        projetDTO.setId(project.getId());
+        projetDTO.setName(project.getName());
+        projetDTO.setProjectTemplateId(project.getProjectTemplateId());
+        projetDTO.setActivites(activityService.getActivitiesByProjectId(project.getId()));
+    return projetDTO;
+
     }
 
 }

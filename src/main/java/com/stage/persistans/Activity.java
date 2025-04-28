@@ -63,7 +63,25 @@ public class Activity {
     private Integer duration;
     private int employersNumber;
 
+    @Column(updatable = false)
+    private LocalDateTime createdDate;
 
+    private LocalDateTime updatedDate;
+
+    @Column(nullable = false)
+    private int archived = 0;
+
+
+    @PrePersist
+    protected void onCreate() {
+        createdDate = LocalDateTime.now();
+        updatedDate = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedDate = LocalDateTime.now();
+    }
 
     public Activity(@NonNull String name, ActivityType typeActivity, @NonNull Project project, CapabilityMachine capabilityMachine, Skill skill, Integer duration, int employersNumber) {
         this.name = name;

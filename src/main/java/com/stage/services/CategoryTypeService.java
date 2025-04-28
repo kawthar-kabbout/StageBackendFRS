@@ -30,5 +30,14 @@ public class CategoryTypeService {
     public CapabilityMachine update(CapabilityMachine categoryType) {
         return categoryTypeRepository.save(categoryType);
     }
+    public Boolean delete (Long id) {
+        CapabilityMachine cap = categoryTypeRepository.findById(id).orElse(null);
+        if (cap != null) {
+            cap.setArchived(1);
+            categoryTypeRepository.save(cap);
+            return true;
+        }return  false;
 
+
+    }
 }

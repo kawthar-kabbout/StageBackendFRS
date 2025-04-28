@@ -5,6 +5,8 @@ import com.stage.persistans.enums.DependencyType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,6 +32,26 @@ public class DependanceActivity {
     @Column(nullable = false)
     private DependencyType dependencyType;
     private int delay;
+
+    @Column(updatable = false)
+    private LocalDateTime createdDate;
+
+    private LocalDateTime updatedDate;
+
+    @Column(nullable = false)
+    private int archived = 0;
+
+
+    @PrePersist
+    protected void onCreate() {
+        createdDate = LocalDateTime.now();
+        updatedDate = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedDate = LocalDateTime.now();
+    }
 
     public DependanceActivity(Activity targetActivity, Activity predecessorActivity, DependencyType dependencyType) {
         this.targetActivity = targetActivity;

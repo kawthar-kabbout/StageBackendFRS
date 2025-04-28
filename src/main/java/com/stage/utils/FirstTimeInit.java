@@ -107,6 +107,7 @@ public class FirstTimeInit implements CommandLineRunner {
             // Création des machines
             Machine machine1 = null;
             Machine machine2 = null;
+            Machine machine11 = null;
 
             if (machineRepository.count() == 0 && s1 != null && s2 != null) {
                 machine1 = new Machine();
@@ -116,6 +117,15 @@ public class FirstTimeInit implements CommandLineRunner {
                 machine1.setMarque("Brand X");
                 machine1.setStatus(true);
                 machine1.setCapabilityMachines(List.of(c1));
+
+
+                machine11 = new Machine();
+                machine11.setSerialNumber("MACHINE-001555");
+                machine11.setName("Machine 11");
+                machine11.setMachineType(MachineType.Automatique);
+                machine11.setMarque("Brand X");
+                machine11.setStatus(true);
+                machine11.setCapabilityMachines(List.of(c1));
 
                 machine2 = new Machine();
                 machine2.setSerialNumber("MACHINE-002");
@@ -127,6 +137,7 @@ public class FirstTimeInit implements CommandLineRunner {
 
                 machineRepository.save(machine1);
                 machineRepository.save(machine2);
+                machineRepository.save(machine11);
             }
         }
 
@@ -187,6 +198,11 @@ public class FirstTimeInit implements CommandLineRunner {
                 DependanceActivity d3 = new DependanceActivity(activity5,activity3, DependencyType.SS,1);
                 dependanceActivityRepository.save(d3);
             }
+           if (activity6.getId() != null && activity5.getId() != null) {
+               DependanceActivity d3 = new DependanceActivity(activity6,activity5, DependencyType.SS,1);
+               dependanceActivityRepository.save(d3);
+           }
+
         }
     }
 

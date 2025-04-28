@@ -10,10 +10,13 @@ import com.stage.services.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -25,20 +28,51 @@ public class ActivityController {
 
 
     @PostMapping
-    public ResponseEntity<Activity> createActivity(@RequestBody @Valid Activity activity) {
+    public ResponseEntity<?> createActivity(@RequestBody @Valid Activity activity) {
+     //Optional<Activity>act =activityService.findByProjectIdAndName(activity.getProject().getId(), activity.getName())
+
+        // Vérifier si une activité avec le même nom existe déjà pour le projet
+        if (activityService.findByProjectIdAndName(activity.getProject().getId(), activity.getName()) != null ) {
+
+
+            // Retourner une réponse avec le code 409 (Conflict) et un message d'erreur
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Une activité avec ce nom existe déjà pour ce projet.");
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+        }
+
+        // Créer l'activité et retourner la réponse avec le code 200 (OK)
         Activity createdModeleActivity = activityService.createActivity(activity);
         return ResponseEntity.ok(createdModeleActivity);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateActivity(@PathVariable Long id, @RequestBody Activity activity) {
+        Optional<Activity> existingOpt = activityService.getActivityById(id);
 
+        if (existingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
+        // Vérifier l'unicité du nom d'activité pour ce projet
+        Activity existingByName = activityService.findByProjectIdAndName(activity.getProject().getId(), activity.getName());
 
-    //get all
-    @GetMapping
-    public ResponseEntity<List<Activity>> getAllActivities() {
-        List<Activity> activities = activityService.getAllActivities();
-        return ResponseEntity.ok(activities);
+        if (existingByName != null && !existingByName.getId().equals(id)) {
+            // Il existe déjà une autre activité avec le même nom pour le même projet
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Une activité avec ce nom existe déjà pour ce projet.");
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+        }
+
+        // Mettre à jour l'activité
+        activity.setId(id); // S'assurer que l'ID correspond à celui de l'URL
+        Activity updated = activityService.updateActivity(activity);
+
+        return ResponseEntity.ok(updated);
     }
+
+
+
     @GetMapping("/project/{projectId}")
     public ResponseEntity<List<Activity>> getActivitiesByProjectId(@PathVariable Long projectId) {
         List<Activity> activities = activityService.getActivitiesByProjectId(projectId);
@@ -91,24 +125,24 @@ public class ActivityController {
     }
 
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Activity> updateActivity(@PathVariable Long id, @RequestBody Activity updatedActivity) {
-        Optional<Activity> existingActivity = activityService.getActivityById(id);
-        if (existingActivity.isPresent()) {
-            updatedActivity.setId(id);
-            Activity savedActivity =activityService.updateActivity(updatedActivity);
-            return ResponseEntity.ok(savedActivity);
+
+
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteActivity(@PathVariable Long id) {
+        Optional<Activity> activity = activityService.getActivityById(id);
+        if (activity.isPresent()) {
+            // Si l'activité existe, on la supprime
+            activityService.deleteActivity(id);
+            return ResponseEntity.noContent().build(); // Retourne 204 No Content, activité supprimée
         } else {
-            return ResponseEntity.notFound().build();
+            // Si l'activité n'existe pas, on retourne une erreur 404 Not Found avec un message
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("L'activité avec l'ID " + id + " n'existe pas.");
         }
     }
 
-    // Delete
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteActivity(@PathVariable Long id) {
-        activityService.deleteActivity(id);
-        return ResponseEntity.noContent().build();
-    }
 
 
 

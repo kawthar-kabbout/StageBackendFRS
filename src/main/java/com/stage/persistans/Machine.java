@@ -4,6 +4,7 @@ import com.stage.persistans.enums.MachineType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -20,7 +21,7 @@ public class Machine {
 
     @NonNull
     @Column(unique = true,nullable = false)
-    private String SerialNumber;
+    private String serialNumber;
 
     @NonNull
     @Column(nullable = false)
@@ -36,5 +37,25 @@ public class Machine {
 
 @ManyToMany
     private List<CapabilityMachine> CapabilityMachines;
+
+    @Column(updatable = false)
+    private LocalDateTime createdDate;
+
+    private LocalDateTime updatedDate;
+
+    @Column(nullable = false)
+    private int archived = 0;
+
+
+    @PrePersist
+    protected void onCreate() {
+        createdDate = LocalDateTime.now();
+        updatedDate = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedDate = LocalDateTime.now();
+    }
 
 }

@@ -25,7 +25,14 @@ public class MachineService {
 
     //public  {}
     public List<Machine> findAll() {
-        return machineRepository.findAll();
+        List<Machine> machines = machineRepository.findAll();
+        List<Machine> machines2 = new ArrayList<>();
+        for (Machine machine:machines){
+            if (machine.getArchived()==0)
+                machines2.add(machine);
+        }
+
+        return machines2;
     }
     public Optional<Machine> findById(Long id) {
         return machineRepository.findById(id);
@@ -34,9 +41,20 @@ public class MachineService {
     public Machine save(Machine machine) {
         return machineRepository.save(machine);
     }
-
-    public void delete(Machine machine) {
-        machineRepository.delete(machine);
+public Machine findBySerialNumber(String serialNumber) {
+        if (machineRepository.findBySerialNumber(serialNumber).isPresent()) {
+            return machineRepository.findBySerialNumber(serialNumber).get();
+        }
+        return null;
+}
+    public Boolean  delete(Machine machine) {
+        Machine m = machineRepository.findById(machine.getId()).orElse(null);
+        if (m != null) {
+            m.setArchived(1);
+            machineRepository.save(m);
+            return true;
+        }
+       return false;
     }
 
     public MachineDTO getMachineDTo (Machine machine) {

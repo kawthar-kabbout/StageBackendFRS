@@ -26,7 +26,14 @@ public class DependanceActivityService {
     }
 
     public List<DependanceActivity> findAll() {
-        return dependanceActivityRepository.findAll();
+        List<DependanceActivity> deps = dependanceActivityRepository.findAll();
+        List<DependanceActivity> result = new ArrayList<>();
+        for (DependanceActivity dep : deps) {
+            if (dep.getArchived()==0)
+                result.add(dep);
+        }
+
+        return result;
     }
 
 
@@ -40,8 +47,10 @@ public class DependanceActivityService {
 public DependanceActivity findByTargetAndProdesesseur( Activity targetActivity, Activity predecessorActivity) {
 
         DependanceActivity result =dependanceActivityRepository.findByTargetActivityAndPredecessorActivity(targetActivity,predecessorActivity);
+        if (result.getArchived()==1)
+           return  null;
 
-            return result;
+        return result;
 
 }
 
@@ -77,22 +86,33 @@ public DependanceActivity findByTargetAndProdesesseur( Activity targetActivity, 
 
         return dependanceActivityRepository.save(modelDependanceActivity);
     }
-    public void deleteById(Long id) {
-        dependanceActivityRepository.deleteById(id);
+    public void deleteByTagetActivity(Activity targetActivity) {
+      List<DependanceActivity> deps=  dependanceActivityRepository.findByTargetActivity(targetActivity);
+      for (DependanceActivity dep : deps) {
+          dep.setArchived(1);
+      }
     }
 
 
 
     public List<DependanceActivity> getDependenceActivitiesByProjectId(Long projectId) {
+        List<Activity> activities = activityService.getActivitiesByProjectId(projectId);
+        List<DependanceActivity> dependenceActivities = new ArrayList<>();
 
-        List<Activity>activities=activityService.getActivitiesByProjectId(projectId);
-        List<DependanceActivity> dependenceActivities=new ArrayList<>();
-        for (Activity activity:activities) {
-            List<DependanceActivity>dependanceActivities= dependanceActivityRepository.findByTargetActivity(activity);
-            dependenceActivities.addAll(dependanceActivities);
+        for (Activity activity : activities) {
+            List<DependanceActivity> depOfActivity = dependanceActivityRepository.findByTargetActivity(activity);
+
+            // Ajouter seulement les dépendances non archivées (archive == 0)
+            for (DependanceActivity dep : depOfActivity) {
+                if (dep.getArchived() == 0 && dep.getPredecessorActivity().getArchived()==0) {
+                    dependenceActivities.add(dep);
+                }
+            }
+
+
         }
-        return dependenceActivities;
 
+        return dependenceActivities;
     }
 
 
@@ -107,10 +127,13 @@ public DependanceActivity findByTargetAndProdesesseur( Activity targetActivity, 
 
     public List<Activity> cloneDependanceActivityRoot(Project newProject , Project oldProject) {
         /// find new roots activities
-        List<Activity>rootActivitres=this.activityRepository.findByProjectIdAndParentActivityIsNull(newProject.getId());
+        /// /activity non archiver
+        List<Activity>rootActivitres=this.activityService.findByProjectIdAndParentActivityIsNull(newProject.getId());
         List<Activity> resultActivitres=new ArrayList<>();
         for (Activity rootActivity : rootActivitres) {
-            resultActivitres.add(coloneDependanceActivtes(rootActivity ,newProject));
+            if (rootActivity.getArchived()==0){
+                resultActivitres.add(coloneDependanceActivtes(rootActivity ,newProject));
+            }
         }
 return resultActivitres;
     }
@@ -119,7 +142,7 @@ return resultActivitres;
         Activity oldActivity=this.activityRepository.findById(newactivity.getActivityTemplateId()).get();
             /// old dep list by target oldact
 
-            List<DependanceActivity> dependanceActivities=dependanceActivityRepository.findByTargetActivity(oldActivity);
+            List<DependanceActivity> dependanceActivities=this.findByTargetActivity(oldActivity);
             for (DependanceActivity oldd : dependanceActivities) {
                Activity newProdecesseur=this.activityService.findByActivityTemplateIdAndProjectId(oldd.getPredecessorActivity().getId(),newproject);
                DependanceActivity newDependanceActivity= DependanceActivity .builder()
@@ -135,9 +158,44 @@ return resultActivitres;
         }
         List<Activity> childrenActivities = activityRepository.findByParentActivity(newactivity);
         for (Activity child : childrenActivities) {
-            coloneDependanceActivtes(child ,newproject);
+           if (child.getArchived()==0){
+               coloneDependanceActivtes(child ,newproject);
+           }
         }
 return newactivity;
+
+    }
+
+    public List<DependanceActivity> findByTargetActivity(Activity targetActivity) {
+        List<DependanceActivity> deps=  dependanceActivityRepository.findByTargetActivity(targetActivity);
+
+        List<DependanceActivity> result = new ArrayList<>();
+        for (DependanceActivity dep : deps) {
+            if (dep.getArchived()==0)
+                result.add(dep);
+        }
+        return result;
+    }
+
+    public Boolean deleteById(DependanceActivity dep) {
+        DependanceActivity dependance = dependanceActivityRepository.findById(dep.getId()).get();
+        if (dependance != null) {
+            dependance.setArchived(1);
+            dependanceActivityRepository.save(dependance);
+            return true;
+        }
+        return false;
+    }
+
+    public Boolean deleteByTargetActivity(Activity targetActivity) {
+        Activity activity = activityRepository.findById(targetActivity.getId()).get();
+        if (activity != null) {
+            List<DependanceActivity> deps= this.findByTargetActivity(targetActivity);
+            for (DependanceActivity dep : deps) {
+                this.deleteById(dep);
+            }
+        return true;
+        } return  false;
 
     }
 }

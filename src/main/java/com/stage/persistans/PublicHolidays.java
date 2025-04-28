@@ -1,5 +1,6 @@
 package com.stage.persistans;
 
+import com.stage.persistans.enums.MachineType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,15 +9,17 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@ToString
+
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
-@ToString
-public class CapabilityMachine {
+public class PublicHolidays {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     private String name;
+    private LocalDateTime startDatePublicHolidays;
+    private int nbdays;
 
     @Column(updatable = false)
     private LocalDateTime createdDate;
@@ -38,4 +41,11 @@ public class CapabilityMachine {
         updatedDate = LocalDateTime.now();
     }
 
+
+    public PublicHolidays(Long id, String name, LocalDateTime startDatePublicHolidays, int nbdays) {
+        this.id = id;
+        this.name = name;
+        this.startDatePublicHolidays = startDatePublicHolidays;
+        this.nbdays = nbdays;
+    }
 }

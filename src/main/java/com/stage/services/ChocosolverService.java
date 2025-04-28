@@ -25,11 +25,12 @@ private  final  EmployerService employerService;
 private final ActivityService activityService;
 private final MachineService machineService;
 private final DependanceActivityService dependanceActivityService;
-
+private final PublicHolidaysService publicHolidaysService;
     public List<Activity> chocosolver(List<Project> projects, LocalDateTime startPlanning) {
         System.out.println("startPlanning: " + startPlanning);
 
         // Récupération des données initiales
+        List<PublicHolidays> holidays = publicHolidaysService.findAll();
         List<EmployerDTo> employers = employerService.getALLEmployerDTO();
         List<MachineDTO> machines = machineService.getALlMachineDTO();
         List<Activity> activities = new ArrayList<>();
@@ -62,6 +63,7 @@ private final DependanceActivityService dependanceActivityService;
         // Variables pour les dates de début et de fin des activités
         IntVar[] startDates = new IntVar[activities.size()];
         IntVar[] endDates = new IntVar[activities.size()];
+
         for (int i = 0; i < activities.size(); i++) {
             startDates[i] = model.intVar("start_" + activities.get(i).getName(), 0, 2160);
             endDates[i] = model.intVar("end_" + activities.get(i).getName(), 0, 2160);
@@ -74,8 +76,30 @@ private final DependanceActivityService dependanceActivityService;
             }
         }
 
+        // Contrainte : Ajuster les dates si elles tombent pendant les vacances publiques
+        for (int i = 0; i < activities.size(); i++) {
+            for (PublicHolidays holiday : holidays) {
+                // Calculer la fin des vacances en ajoutant nbdays à startDatePublicHolidays
+                LocalDateTime holidayEndDate = holiday.getStartDatePublicHolidays()
+                        .plusDays(holiday.getNbdays());
+
+                // Convertir les dates en heures depuis startPlanning pour comparaison
+                int holidayStartHour = (int) Duration.between(startPlanning, holiday.getStartDatePublicHolidays()).toHours();
+                int holidayEndHour = (int) Duration.between(startPlanning, holidayEndDate).toHours();
+
+                // Contrainte : Si la date de début de l'activité est pendant les vacances
+                model.ifThen(
+                        model.and(
+                                model.arithm(startDates[i], ">=", holidayStartHour),
+                                model.arithm(startDates[i], "<", holidayEndHour)
+                        ),
+                        model.arithm(startDates[i], "=", holidayEndHour) // Décaler après la fin des vacances
+                );
+            }
+        }
+
         // Calcul des dates de fin maximales pour chaque employé
-        int[] maxExistingEnds = new int[employers.size()];
+        int[] maxExistingEndsEmployers = new int[employers.size()];
         for (int j = 0; j < employers.size(); j++) {
             EmployerDTo employer = employers.get(j);
             long maxEnd = employer.getActivitiesNotFinish().stream()
@@ -83,14 +107,25 @@ private final DependanceActivityService dependanceActivityService;
                     .mapToLong(endDate -> Duration.between(startPlanning, endDate).toHours())
                     .max()
                     .orElse(-1); // -1 si l'employé n'a pas d'activités existantes
-            maxExistingEnds[j] = (int) maxEnd;
+            maxExistingEndsEmployers[j] = (int) maxEnd;
+        }
+
+        // Calcul des dates de fin maximales pour chaque machine
+        int[] maxExistingEndsMachines = new int[machines.size()];
+        for (int k = 0; k < machines.size(); k++) {
+            MachineDTO machine = machines.get(k);
+            long maxEnd = machine.getActivitiesNotFinish().stream()
+                    .map(Activity::getPlannedEndDate)
+                    .mapToLong(endDate -> Duration.between(startPlanning, endDate).toHours())
+                    .max()
+                    .orElse(-1); // -1 si la machine n'a pas d'activités existantes
+            maxExistingEndsMachines[k] = (int) maxEnd;
         }
 
         // Contraintes de dépendance des tâches
         for (DependanceActivity dep : deps) {
             int targetIndex = activities.indexOf(dep.getTargetActivity());
             int predecessorIndex = activities.indexOf(dep.getPredecessorActivity());
-
             switch (dep.getDependencyType()) {
                 case FS: // Finish-to-Start
                     model.arithm(startDates[targetIndex], ">=", endDates[predecessorIndex], "+", dep.getDelay()).post();
@@ -129,19 +164,17 @@ private final DependanceActivityService dependanceActivityService;
                 // Contrainte sur les employeurs
                 boolean canAssignEmployers = false;
                 model.sum(employerAssignment[i], "=", activity.getEmployersNumber()).post(); // Nombre exact d'employeurs requis
-
                 for (int j = 0; j < employers.size(); j++) {
                     EmployerDTo employer = employers.get(j);
                     if (employer.getSkills().stream().noneMatch(skill -> skill.getId().equals(requiredSkill.getId()))) {
                         model.arithm(employerAssignment[i][j], "=", 0).post();
                     } else {
                         canAssignEmployers = true;
-
                         // Contrainte de disponibilité individuelle
-                        if (maxExistingEnds[j] >= 0) {
+                        if (maxExistingEndsEmployers[j] >= 0) {
                             model.ifThen(
                                     model.arithm(employerAssignment[i][j], "=", 1),
-                                    model.arithm(startDates[i], ">=", maxExistingEnds[j])
+                                    model.arithm(startDates[i], ">=", maxExistingEndsEmployers[j])
                             );
                         }
                     }
@@ -151,22 +184,29 @@ private final DependanceActivityService dependanceActivityService;
                 if (requiredCapability != null) {
                     boolean canAssignMachines = false;
                     model.sum(machineAssignment[i], "=", 1).post(); // Une seule machine peut être affectée
-
                     for (int k = 0; k < machines.size(); k++) {
                         MachineDTO machine = machines.get(k);
                         if (machine.getCapabilityMachine().stream().noneMatch(cap -> cap.getId().equals(requiredCapability.getId()))) {
                             model.arithm(machineAssignment[i][k], "=", 0).post();
                         } else {
                             canAssignMachines = true;
+                            // Contrainte de disponibilité individuelle
+                            if (maxExistingEndsMachines[k] >= 0) {
+                                model.ifThen(
+                                        model.arithm(machineAssignment[i][k], "=", 1),
+                                        model.arithm(startDates[i], ">=", maxExistingEndsMachines[k])
+                                );
+                            }
                         }
                     }
-
+                    // Si aucune machine compatible n'est trouvée, désactiver l'affectation
                     if (!canAssignMachines) {
                         for (int k = 0; k < machines.size(); k++) {
                             model.arithm(machineAssignment[i][k], "=", 0).post();
                         }
                     }
                 } else {
+                    // Si l'activité n'a pas de capacité requise, aucune machine ne doit être affectée
                     for (int k = 0; k < machines.size(); k++) {
                         model.arithm(machineAssignment[i][k], "=", 0).post();
                     }
@@ -199,39 +239,65 @@ private final DependanceActivityService dependanceActivityService;
             }
         }
 
-        // Contrainte : startDate >= max(maxExistingEnds[j] pour les employés affectés)
+        // Contrainte : Une machine ne peut pas être utilisée sur deux activités simultanément
+        for (int k = 0; k < machines.size(); k++) {
+            for (int i1 = 0; i1 < activities.size(); i1++) {
+                for (int i2 = i1 + 1; i2 < activities.size(); i2++) {
+                    model.ifThen(
+                            model.and(
+                                    model.arithm(machineAssignment[i1][k], "=", 1),
+                                    model.arithm(machineAssignment[i2][k], "=", 1)
+                            ),
+                            model.or(
+                                    model.arithm(endDates[i1], "<=", startDates[i2]),
+                                    model.arithm(endDates[i2], "<=", startDates[i1])
+                            )
+                    );
+                }
+            }
+        }
+
+        // Contrainte : startDate >= max(maxExistingEnds[j] pour les employés et machines affectés)
         for (int i = 0; i < activities.size(); i++) {
-            Activity activity = activities.get(i);
             IntVar[] assignedEmployers = new IntVar[employers.size()];
+            IntVar[] assignedMachines = new IntVar[machines.size()];
             for (int j = 0; j < employers.size(); j++) {
                 assignedEmployers[j] = employerAssignment[i][j];
             }
+            for (int k = 0; k < machines.size(); k++) {
+                assignedMachines[k] = machineAssignment[i][k];
+            }
 
             // Variable pour stocker le maximum des dates de fin existantes des employés affectés
-            IntVar maxEndVar = model.intVar("maxEnd_" + i, 0, 2160);
-
-            // Contrainte : maxEndVar doit être >= maxExistingEnds[j] pour chaque employé affecté
+            IntVar maxEndVarEmployers = model.intVar("maxEndEmployers_" + i, 0, 2160);
             for (int j = 0; j < employers.size(); j++) {
                 model.ifThen(
                         model.arithm(employerAssignment[i][j], "=", 1), // Si l'employé est affecté
-                        model.arithm(maxEndVar, ">=", maxExistingEnds[j]) // Alors maxEndVar >= sa date de fin existante
+                        model.arithm(maxEndVarEmployers, ">=", maxExistingEndsEmployers[j]) // Alors maxEndVarEmployers >= sa date de fin existante
                 );
             }
 
-            // Appliquer la contrainte uniquement si activity.getEmployersNumber() >= 2
-            if (activity.getEmployersNumber() >= 2) {
-                // Contrainte : startDate[i] == maxEndVar
+            // Variable pour stocker le maximum des dates de fin existantes des machines affectées
+            IntVar maxEndVarMachines = model.intVar("maxEndMachines_" + i, 0, 2160);
+            for (int k = 0; k < machines.size(); k++) {
                 model.ifThen(
-                        model.sum(assignedEmployers, "=", activity.getEmployersNumber()), // Si le nombre requis d'employés est affecté
-                        model.arithm(startDates[i], "=", maxEndVar) // Alors startDate[i] == maxEndVar
-                );
-            } else {
-                // Sinon, startDate[i] >= maxEndVar
-                model.ifThen(
-                        model.sum(assignedEmployers, "=", activity.getEmployersNumber()), // Si le nombre requis d'employés est affecté
-                        model.arithm(startDates[i], ">=", maxEndVar) // Alors startDate[i] >= maxEndVar
+                        model.arithm(machineAssignment[i][k], "=", 1), // Si la machine est affectée
+                        model.arithm(maxEndVarMachines, ">=", maxExistingEndsMachines[k]) // Alors maxEndVarMachines >= sa date de fin existante
                 );
             }
+
+            // Variable pour stocker le maximum global (entre les employés et les machines)
+            IntVar maxEndVarGlobal = model.intVar("maxEndGlobal_" + i, 0, 2160);
+            model.max(maxEndVarGlobal, new IntVar[]{maxEndVarEmployers, maxEndVarMachines}).post();
+
+            // Contrainte : startDate[i] >= maxEndVarGlobal
+            model.ifThen(
+                    model.and(
+                            model.sum(assignedEmployers, "=", activities.get(i).getEmployersNumber()), // Si le nombre requis d'employés est affecté
+                            model.sum(assignedMachines, "=", 1) // Si une machine est affectée (ou 0 si pas de machine requise)
+                    ),
+                    model.arithm(startDates[i], ">=", maxEndVarGlobal) // Alors startDate[i] >= maxEndVarGlobal
+            );
         }
 
         // Variable pour la durée totale d'exécution
@@ -242,9 +308,6 @@ private final DependanceActivityService dependanceActivityService;
         model.setObjective(Model.MINIMIZE, totalDuration);
 
         // Résolution du modèle
-        System.out.println("");
-        System.out.println("");
-        System.out.println("");
         System.out.println("Recherche de la meilleure solution...");
         Solver solver = model.getSolver();
         solver.limitSolution(100); // Limite à 10 solutions
@@ -255,15 +318,10 @@ private final DependanceActivityService dependanceActivityService;
         while (solver.solve()) {
             solutionCount++;
             System.out.println("Solution " + solutionCount + " trouvée :");
-
             if (solutionCount == 1 || totalDuration.getValue() < bestTotalDuration) {
                 results.clear();
-
                 for (int i = 0; i < activities.size(); i++) {
                     Activity activity = activities.get(i);
-
-                    // Affichage du nom de l'activité
-                    System.out.print("Activité : " + activity.getName() + " -> ");
 
                     // Mise à jour et affichage des employés affectés
                     boolean hasEmployers = false;
@@ -312,7 +370,6 @@ private final DependanceActivityService dependanceActivityService;
                     // Ajout de l'activité aux résultats
                     results.add(activity);
                     activityService.updateActivity(activity);
-
                     Optional<Activity> act = activityService.getActivityById(activity.getId());
                     if (act.isPresent()) {
                         System.out.println(act);

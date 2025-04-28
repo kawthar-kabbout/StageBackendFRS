@@ -11,6 +11,8 @@ import com.stage.repositories.ActivityRepository;
 import com.stage.repositories.DependanceActivityRepository;
 import com.stage.repositories.SkillRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,21 +34,33 @@ public class ActivityService {
         return Arrays.asList(ActivityType.values());
     }
 public List<Activity> getActivitiesByProjectId(Long projectId) {
-        return activityRepository.findByProject_Id(projectId);
+List<Activity> res = new ArrayList<>();
+        List <Activity> activities = activityRepository.findByProject_Id(projectId);
+        for (Activity activity : activities) {
+            if(activity.getArchived()==0)
+                res.add(activity);
+        }
+
+
+        return res;
 }
     // Create
     public Activity createActivity(Activity activity) {
-        Optional<Activity>activityByname=activityRepository.findByProjectIdAndName(activity.getProject().getId(),activity.getName());
-        if (activityByname.isPresent()) {
-            throw new IllegalArgumentException("Une activité avec ce nom existe déjà !");
-        }
+
 
         return activityRepository.save(activity);
     }
 
     // Read All
     public List<Activity> getAllActivities() {
-        return activityRepository.findAll();
+List<Activity> res = new ArrayList<>();
+        List<Activity> activities= activityRepository.findAll();
+        for (Activity activity : activities) {
+            if (activity.getArchived()==0)
+                res.add(activity);
+        }
+
+        return res;
     }
 public Long countActivitiesByProjectId(Long id){
 return  activityRepository.countByProjectId(id);
@@ -56,21 +70,36 @@ return  activityRepository.countByProjectId(id);
         return activityRepository.findById(id);
     }
 
-    // Read One by Name
     public Optional<Activity> getActivityByName(String name) {
         return activityRepository.findByName(name);
     }
 
-
-
-    // Update
     public Activity updateActivity(Activity modeleActivity) {
-        return activityRepository.save(modeleActivity);
+        return this.createActivity(modeleActivity);
     }
 
-    // Delete
-    public void deleteActivity(Long id) {
-        activityRepository.deleteById(id);
+    public Boolean deleteActivity(Long id) {
+        Activity activity = activityRepository.findById(id).get();
+        if (activity != null) {
+            {
+
+                activityRepository.save(activity);
+                List<DependanceActivity> deps=  dependanceActivityRepository.findByTargetActivity(activity);
+                List<DependanceActivity>depsProdese = dependanceActivityRepository.findByPredecessorActivity(activity);
+
+                for (DependanceActivity dep : deps) {
+                    dep.setArchived(1);
+
+                }
+                for (DependanceActivity dep : depsProdese) {
+                    dep.setArchived(1);
+                }
+                activity.setArchived(1);
+
+            }
+            return true;
+        }
+        return  false;
     }
 
 
@@ -86,7 +115,9 @@ return  activityRepository.countByProjectId(id);
         List<Activity> rootActivities = activityRepository.findByProjectIdAndParentActivityIsNull(projectId);
         List<ActivityDTO> result = new ArrayList<>();
         for (Activity root : rootActivities) {
-            result.add(buildActivityTree(root));
+           if (root.getArchived()==0){
+               result.add(buildActivityTree(root));
+           }
         }
         return result;
     }
@@ -122,7 +153,9 @@ return  activityRepository.countByProjectId(id);
         if (!childrenActivities.isEmpty()) {
             List<ActivityDTO> childrenDTOs = new ArrayList<>();
             for (Activity child : childrenActivities) {
-                childrenDTOs.add(buildActivityTree(child));
+              if (child.getArchived()==0){
+                  childrenDTOs.add(buildActivityTree(child));
+              }
             }
             dto.setChildActivities(childrenDTOs);
         }
@@ -166,10 +199,11 @@ return  activityRepository.countByProjectId(id);
             List<DependanceActivity> predecessorActivities = dependanceActivityRepository.findByTargetActivity(activity);
 
             for (DependanceActivity p : predecessorActivities) {
-                predecessorMap.put(
+                if (p.getArchived()==0)
+                {predecessorMap.put(
                         p.getPredecessorActivity().getId(),
                         p.getDependencyType().name()
-                );
+                );}
             }
         }
 
@@ -186,13 +220,25 @@ return  activityRepository.countByProjectId(id);
             List<DependanceActivity> successorActivities=dependanceActivityRepository.findByPredecessorActivity(activity);
 
             for (DependanceActivity p : successorActivities) {
-                successorMap.put(p.getTargetActivity().getId(), p.getDependencyType().name());
+                if (p.getArchived()==0)
+                {successorMap.put(p.getTargetActivity().getId(), p.getDependencyType().name());}
             }
         }
 
         return successorMap;
     }
 
+
+    public List <Activity> findByProjectIdAndParentActivityIsNull(Long projectId) {
+        List<Activity>rootActivitres=this.activityRepository.findByProjectIdAndParentActivityIsNull(projectId);
+        List <Activity>resultActivitres=new ArrayList<>();
+        for (Activity a : rootActivitres) {
+            if (a.getArchived()==0)
+                resultActivitres.add(a);
+        }
+
+        return resultActivitres;
+    }
 
 
     public List<Activity>getEmployerActivitiesNotFinish(Employer employer) {
@@ -228,7 +274,10 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject,
         List<Activity> roots = activityRepository.findByProjectIdAndParentActivityIsNull(oldProject.getId());
         List<Activity> result = new ArrayList<>();
         for (Activity root : roots) {
-                result.add(cloneActivity(root, newProject, null,activitesFrontDTO));
+               if (root.getArchived()==0)
+               {
+                   result.add(cloneActivity(root, newProject, null,activitesFrontDTO));
+               }
         }
 
 
@@ -266,7 +315,9 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject,
         List<Activity> childrenActivities = activityRepository.findByParentActivity(oldActivity);
 
             for (Activity child : childrenActivities) {
-                cloneActivity(child,newProject,newActivity,activitesFrontDTO );
+                if (child.getArchived()==0){
+                    cloneActivity(child,newProject,newActivity,activitesFrontDTO );
+                }
             }
         return newActivity;
     }
@@ -298,6 +349,15 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject,
         }
         return activity;
 
+    }
+
+    public Activity findByProjectIdAndName(Long id,  String name) {
+        Optional<Activity>activityByname=activityRepository.findByProjectIdAndName(id, name);
+        if (activityByname.isPresent()) {
+           return activityByname.get();
+        }
+
+        return null;
     }
 }
 

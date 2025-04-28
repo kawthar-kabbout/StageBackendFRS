@@ -2,6 +2,7 @@ package com.stage.controller;
 
 import com.stage.dto.ActiviteFrontDTO;
 import com.stage.dto.ActivityDTO;
+import com.stage.dto.ProjetDTO;
 import com.stage.persistans.Activity;
 import com.stage.persistans.Project;
 import com.stage.repositories.ProjectRepository;
@@ -20,9 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -50,20 +49,25 @@ public class ProjectController {
             return ResponseEntity.notFound().build();
         }
     }
-    @GetMapping("/name/{name}")
-public ResponseEntity<Project> getProjectByName(@PathVariable String name) {
-        Optional<Project> project = projectService.getProjectByName(name);
-        if (project.isPresent()) {
-            return ResponseEntity.ok(project.get());
-        }return ResponseEntity.notFound().build();
-    }
 
 
     @PostMapping
-    public ResponseEntity<Project> createProject(@RequestBody Project project) {
+    public ResponseEntity<?> createProject(@RequestBody Project project) {
+        if (projectService.getProjectByName(project.getName()) != null) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Un projet avec ce nom existe déjà.");
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(response);
+        }
+
         Project savedProject = projectService.save(project);
-        return ResponseEntity.ok(savedProject);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Projet créé avec succès.");
+        response.put("project", savedProject);
+        return ResponseEntity.ok(response);
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<Project> updateProject(@PathVariable Long id, @RequestBody Project project) {
         Optional<Project> savedProject = projectService.getProjectById(id);
@@ -161,4 +165,15 @@ public ResponseEntity<Project> getProjectByName(@PathVariable String name) {
 
         return ResponseEntity.ok(result);
     }
+
+        @GetMapping("/project/planning/{id}")
+    public ResponseEntity<ProjetDTO> getProjectPlanning(@PathVariable Long id) {
+        Optional<Project> project = projectService.getProjectById(id);
+        if (project.isPresent()) {
+            ProjetDTO projetDTO = projectService.getProjetDTOPalnification(project.get());
+            return ResponseEntity.ok(projetDTO);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
 }

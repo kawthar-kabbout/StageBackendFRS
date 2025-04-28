@@ -1,13 +1,19 @@
 package com.stage.controller;
 
+import com.stage.persistans.Activity;
 import com.stage.persistans.Machine;
 import com.stage.persistans.enums.MachineType;
+import com.stage.services.ActivityService;
 import com.stage.services.MachineService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/machines")
@@ -15,6 +21,7 @@ import java.util.List;
 public class MachineController {
 
     private final MachineService machineService;
+    private final ActivityService activityService;
 
 
     @GetMapping
@@ -36,9 +43,19 @@ public class MachineController {
     }*/
 
     @PostMapping
-    public ResponseEntity<Machine> createMachine(@RequestBody Machine machine) {
+    public ResponseEntity<?> createMachine(@RequestBody Machine machine) {
+        Map<String, String> response = new HashMap<>();
+
+        if (machineService.findBySerialNumber(machine.getSerialNumber()) != null) {
+            response.put("message", "Une machine avec ce numéro de série existe déjà.");
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(response);
+        }
+
         machineService.save(machine);
-        return ResponseEntity.ok(machine);
+        response.put("message", "Machine enregistrée avec succès.");
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/machienType")
@@ -67,6 +84,26 @@ public class MachineController {
             return ResponseEntity.notFound().build();
         }
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMachine(@PathVariable Long id) {
+        Optional<Machine> optionalMachine = machineService.findById(id);
+
+        if (optionalMachine.isEmpty()) {
+            return new ResponseEntity<>("Machine introuvable.", HttpStatus.NOT_FOUND);
+        }
+
+        Machine machine = optionalMachine.get();
+        List<Activity> activities = activityService.getAllActivities();
+        for (Activity activity : activities) {
+            if (activity.getMachine() != null && activity.getMachine().getId().equals(id)) {
+                return new ResponseEntity<>("Impossible de supprimer cette machine : elle est liée à une activité.", HttpStatus.CONFLICT);
+            }
+        }
+
+        machineService.delete(machine);
+        return new ResponseEntity<>("Machine supprimée avec succès.", HttpStatus.NO_CONTENT);
+    }
+
 
 
 }

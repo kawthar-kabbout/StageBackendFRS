@@ -37,8 +37,13 @@ private final ActivityService activityService;
 
 
     public List<Employer> findAll() {
-
-        return employerRepository.findAll();
+List<Employer>employers = new ArrayList<>();
+List<Employer> employerList = employerRepository.findAll();
+for (Employer employer:employerList){
+    if (employer.getArchived()==0)
+        employers.add(employer);
+}
+return employers;
     }
     public List<EmployerDTo> getALLEmployerDTO() {
         List<Employer> employers = employerRepository.findAll();
@@ -55,7 +60,13 @@ private final ActivityService activityService;
         return employerRepository.findById(id);
     }
 
-
+public Employer findEmployerByPhone(String phone) {
+        Optional<Employer> employer = employerRepository.findByPhone(phone);
+        if (employer.isPresent()) {
+            return employer.get();
+        }
+        return null;
+}
     public Employer save(Employer employer) {
        return employerRepository.save(employer);
     }
@@ -67,11 +78,15 @@ private final ActivityService activityService;
         return employerRepository.save(employer);
     }
 
-    public void delete(Employer employer) {
-        if (employer == null) {
-            throw new IllegalArgumentException("Employer must not be null");
+    public boolean delete(Employer employer) {
+        Employer employerToDelete = employerRepository.findById(employer.getId()).orElse(null);
+        if (employerToDelete != null) {
+            employerToDelete.setArchived(1);
+            employerRepository.save(employerToDelete);
+            return true;
         }
-        employerRepository.delete(employer);
+        return false;
+
     }
 
 

@@ -11,6 +11,7 @@ import com.stage.services.DependanceActivityService;
 import com.stage.services.ActivityService;
 import com.stage.services.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.*;
@@ -94,5 +95,23 @@ public class DependanceActivityController {
      }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteModelDependanceActivity(@PathVariable Long id) {
+        Optional<DependanceActivity> modelDependanceActivity = dependanceActivityService.findById(id);
 
+        if (modelDependanceActivity.isPresent()) {
+            dependanceActivityService.deleteById(modelDependanceActivity.get());
+            // Retourner un message clair de succès
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "La dépendance d'activité a été supprimée avec succès.");
+            return ResponseEntity.ok(response);
+        } else {
+            // Retourner un message clair si non trouvé
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "La dépendance d'activité avec cet ID n'existe pas.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
+
+
+}
