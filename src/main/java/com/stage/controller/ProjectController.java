@@ -79,13 +79,6 @@ public class ProjectController {
 
         }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
-
-        projectService.delete(id);
-        return ResponseEntity.noContent().build();
-
-    }
 
 
 
@@ -176,4 +169,20 @@ public class ProjectController {
         return ResponseEntity.notFound().build();
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
+        Optional<Project> projectOpt = projectService.getProjectById(id);
+
+        if (projectOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        boolean deleted = projectService.deleteProject(projectOpt.get());
+
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

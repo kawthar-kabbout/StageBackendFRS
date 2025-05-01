@@ -33,6 +33,8 @@ public class ActivityService {
     public List<ActivityType> getTypes() {
         return Arrays.asList(ActivityType.values());
     }
+
+
 public List<Activity> getActivitiesByProjectId(Long projectId) {
 List<Activity> res = new ArrayList<>();
         List <Activity> activities = activityRepository.findByProject_Id(projectId);
@@ -75,7 +77,21 @@ return  activityRepository.countByProjectId(id);
     }
 
     public Activity updateActivity(Activity modeleActivity) {
-        return this.createActivity(modeleActivity);
+
+            return this.createActivity(modeleActivity);
+
+
+    }
+    public Activity updateActivityDurationAndEmpLNumber(Activity modeleActivity) {
+        Optional<Activity>activity = activityRepository.findById(modeleActivity.getId());
+        if (activity.isPresent()) {
+            Activity modeleActivity1 = activity.get();
+            modeleActivity1.setDuration(modeleActivity.getDuration());
+            modeleActivity1.setEmployersNumber(modeleActivity.getEmployersNumber());
+            return this.createActivity(modeleActivity1);
+        }
+        return null;
+
     }
 
     public Boolean deleteActivity(Long id) {
@@ -102,7 +118,15 @@ return  activityRepository.countByProjectId(id);
         return  false;
     }
 
-
+public Boolean deleteActivitiesByProject(Long projectId) {
+        List<Activity> activities= activityRepository.findByProject_Id(projectId);
+        for (Activity activity : activities) {
+            if (this.deleteActivity(activity.getId())==false) {
+                return false;
+            }
+        }
+        return true;
+}
 
 
     public Activity findByActivityTemplateIdAndProjectId(Long templateId,Project project) {
@@ -184,7 +208,14 @@ return  activityRepository.countByProjectId(id);
                 collectLeafActivities(child, leaves);
             }
         }
+
+
     }
+
+
+
+
+
 
 
 
@@ -359,6 +390,9 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject,
 
         return null;
     }
+
+
+
 }
 
 

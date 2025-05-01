@@ -89,6 +89,15 @@ public Employer findEmployerByPhone(String phone) {
 
     }
 
+public Employer updateStatus(Employer employer) {
+        Employer employerToUpdate = employerRepository.findById(employer.getId()).get();
 
+        if (employerToUpdate != null) {
+            employerToUpdate.setStatus(employer.getStatus());
+            employerRepository.save(employerToUpdate);
+            return employerToUpdate;
+        }
+        return null;
+}
 
 }

@@ -26,10 +26,14 @@ private final ActivityService activityService;
 private final MachineService machineService;
 private final DependanceActivityService dependanceActivityService;
 private final PublicHolidaysService publicHolidaysService;
+private  final WorkTimeService workTimeService;
     public List<Activity> chocosolver(List<Project> projects, LocalDateTime startPlanning) {
+
+
         System.out.println("startPlanning: " + startPlanning);
 
         // Récupération des données initiales
+        WorkTime workTime = workTimeService.findById(1L);
         List<PublicHolidays> holidays = publicHolidaysService.findAll();
         List<EmployerDTo> employers = employerService.getALLEmployerDTO();
         List<MachineDTO> machines = machineService.getALlMachineDTO();

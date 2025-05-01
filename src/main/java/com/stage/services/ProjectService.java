@@ -8,6 +8,7 @@ import com.stage.repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 @Service
@@ -19,7 +20,13 @@ public class ProjectService {
 
 
     public List<Project>  getALlProject() {
-        return projectRepository.findAll();
+        List<Project> projects = projectRepository.findAll();
+        List<Project> result = new ArrayList<Project>();
+        for (Project project : projects) {
+            if(project.getArchived()==0)
+                result.add(project);
+        }
+        return result;
     }
 
     public Optional<Project> getProjectById(Long id) {
@@ -78,6 +85,17 @@ public class ProjectService {
         projetDTO.setActivites(activityService.getActivitiesByProjectId(project.getId()));
     return projetDTO;
 
+    }
+
+    public Boolean deleteProject(Project project) {
+        Optional<Project> projectOptional = projectRepository.findById(project.getId());
+        if (projectOptional.isPresent()) {
+            projectOptional.get().setArchived(1);
+            projectRepository.save(projectOptional.get());
+            activityService.deleteActivitiesByProject(projectOptional.get().getId());
+            return true;
+
+        }return  false;
     }
 
 }

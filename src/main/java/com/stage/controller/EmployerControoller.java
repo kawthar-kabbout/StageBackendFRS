@@ -106,5 +106,16 @@ public class EmployerControoller {
 }
 
 
+@PutMapping("/updateStatus/{id}")
+    public ResponseEntity<?> updateStatus(@PathVariable("id") Long id, @RequestBody Employer employer) {
+        Optional<Employer> existingEmployerOpt = employerService.findById(id);
+        if (existingEmployerOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Employer existingEmployer = existingEmployerOpt.get();
+        employerService.updateStatus(employer);
+        return new ResponseEntity<>(existingEmployer, HttpStatus.OK);
+}
+
 
 }

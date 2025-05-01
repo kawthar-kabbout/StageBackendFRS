@@ -2,10 +2,12 @@ package com.stage.controller;
 
 import com.stage.dto.ActivityDTO;
 import com.stage.persistans.Activity;
+import com.stage.persistans.DependanceActivity;
 import com.stage.persistans.Project;
 import com.stage.persistans.enums.StatutActivity;
 import com.stage.persistans.enums.ActivityType;
 import com.stage.services.ActivityService;
+import com.stage.services.DependanceActivityService;
 import com.stage.services.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/activities")
@@ -25,6 +24,7 @@ import java.util.Optional;
 public class ActivityController {
     private  final ActivityService activityService;
     private final  ProjectService projectService;
+    private final DependanceActivityService dependanceActivityService;
 
 
     @PostMapping
@@ -71,6 +71,21 @@ public class ActivityController {
         return ResponseEntity.ok(updated);
     }
 
+    @PutMapping("/list")
+    public ResponseEntity<List<Activity>> updateActivitiesPlanning(@RequestBody List<Activity> activities) {
+        if (activities == null || activities.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Activity> updatedActivities = new ArrayList<>();
+        for (Activity activity : activities) {
+            // Ici tu peux faire un contrôle supplémentaire si besoin (ex: vérifier si l'activité existe déjà)
+            Activity updated = activityService.updateActivityDurationAndEmpLNumber(activity); // Utilise ton service pour sauvegarder (update ou create)
+            updatedActivities.add(updated);
+        }
+
+        return ResponseEntity.ok(updatedActivities);
+    }
 
 
     @GetMapping("/project/{projectId}")
@@ -78,6 +93,38 @@ public class ActivityController {
         List<Activity> activities = activityService.getActivitiesByProjectId(projectId);
         return ResponseEntity.ok(activities);
     }
+    @GetMapping("/project/nodeps/{projectId}")
+    public ResponseEntity<List<Activity>> getActivitiesByProjectIdHasNoDeps(@PathVariable Long projectId) {
+        // Récupère toutes les activités du projet
+        List<Activity> activities = activityService.getActivitiesByProjectId(projectId);
+
+        // Récupère toutes les dépendances du projet une seule fois
+        List<DependanceActivity> allDependencies = dependanceActivityService.getDependenceActivitiesByProjectId(projectId);
+
+        List<Activity> result = new ArrayList<>();
+
+        for (Activity activity : activities) {
+            boolean hasDependencies = false;
+
+            // Vérifie chaque dépendance
+            for (DependanceActivity dep : allDependencies) {
+                // Vérifie si l'activité est impliquée dans une dépendance
+                if (dep.getTargetActivity().getId().equals(activity.getId())
+                        || dep.getPredecessorActivity().getId().equals(activity.getId())) {
+                    hasDependencies = true;
+                    break; // Sort de la boucle dès qu'une dépendance est trouvée
+                }
+            }
+
+            // Ajoute l'activité seulement si elle n'a aucune dépendance
+            if (!hasDependencies) {
+                result.add(activity);
+            }
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/count-by-project/{projectId}")
     public long countActivitiesByProjectId(@PathVariable Long projectId) {
         return activityService.countActivitiesByProjectId(projectId);

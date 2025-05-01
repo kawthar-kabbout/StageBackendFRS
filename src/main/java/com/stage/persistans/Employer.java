@@ -43,6 +43,8 @@ public class Employer {
 
     @NotBlank
     private String grade;
+    @NonNull
+    private Boolean status  =true;
 
     @Column(updatable = false)
     private LocalDateTime createdDate;

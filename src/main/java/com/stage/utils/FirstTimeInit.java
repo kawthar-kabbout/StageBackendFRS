@@ -11,6 +11,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -24,6 +26,7 @@ public class FirstTimeInit implements CommandLineRunner {
     private final EmployerRepository employerRepository;
     private final MachineRepository machineRepository;
     private final  CapabilityMachineRepository capabilityMachineRepository;
+    private final WorkTimeRepository workTimeRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -31,6 +34,33 @@ public class FirstTimeInit implements CommandLineRunner {
     }
 
     private void createModelActivities() {
+
+
+
+
+
+        WorkTime workTime = new WorkTime();
+
+        // Configuration des horaires de travail en semaine
+        workTime.setMorningSessionStart(LocalTime.of(8, 0));   // Matin : 08:00
+        workTime.setMorningSessionEnd(LocalTime.of(12, 0));     // Matin : 12:00
+        workTime.setAfternoonSessionStart(LocalTime.of(13, 0)); // Après-midi : 13:00
+        workTime.setAfternoonSessionEnd(LocalTime.of(17, 0));   // Après-midi : 17:00
+
+        // Configuration d'un jour de week-end travaillé (exemple : samedi)
+        workTime.setWeekendDay("Samedi");
+        workTime.setWeekendWorkTimeStart(LocalTime.of(9, 0));    // Samedi : 09:00
+        workTime.setWeekendWorkTimeEnd(LocalTime.of(13, 0));     // Samedi : 13:00
+
+        // Liste des jours travaillés (ex: Lundi à Vendredi)
+        workTime.setWorkingDays(Arrays.asList("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"));
+
+        // Liste des jours non travaillés (ex: Dimanche + Samedi si pas de travail le week-end)
+        workTime.setNoWorkingDays(Arrays.asList("Dimanche"));
+        workTimeRepository.save(workTime);
+
+
+
         Skill s1 = null;
         Skill s2 = null;
         CapabilityMachine c1 = null;
