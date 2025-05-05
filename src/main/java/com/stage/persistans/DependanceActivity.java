@@ -14,10 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 @Entity
-@Table(
-        uniqueConstraints = @UniqueConstraint(columnNames =
-                {"targetActivity_id", "predecessorActivity_id"})
-)
+
 public class DependanceActivity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

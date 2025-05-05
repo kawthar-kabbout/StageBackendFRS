@@ -2,6 +2,7 @@ package com.stage.services;
 
 import com.stage.dto.EmployerDTo;
 import com.stage.dto.MachineDTO;
+import com.stage.dto.PublicHolidaysDTO;
 import com.stage.persistans.*;
 import lombok.RequiredArgsConstructor;
 import org.chocosolver.solver.Model;
@@ -26,15 +27,11 @@ private final ActivityService activityService;
 private final MachineService machineService;
 private final DependanceActivityService dependanceActivityService;
 private final PublicHolidaysService publicHolidaysService;
-private  final WorkTimeService workTimeService;
     public List<Activity> chocosolver(List<Project> projects, LocalDateTime startPlanning) {
-
-
         System.out.println("startPlanning: " + startPlanning);
 
         // Récupération des données initiales
-        WorkTime workTime = workTimeService.findById(1L);
-        List<PublicHolidays> holidays = publicHolidaysService.findAll();
+        List<PublicHolidaysDTO> holidays = publicHolidaysService.findAllPublicHolidaysDTO();
         List<EmployerDTo> employers = employerService.getALLEmployerDTO();
         List<MachineDTO> machines = machineService.getALlMachineDTO();
         List<Activity> activities = new ArrayList<>();
@@ -81,26 +78,23 @@ private  final WorkTimeService workTimeService;
         }
 
         // Contrainte : Ajuster les dates si elles tombent pendant les vacances publiques
+        // Contrainte : Une activité ne doit pas chevaucher un jour férié
         for (int i = 0; i < activities.size(); i++) {
-            for (PublicHolidays holiday : holidays) {
-                // Calculer la fin des vacances en ajoutant nbdays à startDatePublicHolidays
-                LocalDateTime holidayEndDate = holiday.getStartDatePublicHolidays()
-                        .plusDays(holiday.getNbdays());
-
-                // Convertir les dates en heures depuis startPlanning pour comparaison
+            for (PublicHolidaysDTO holiday : holidays) {
+                // Convertir les dates du jour férié en heures depuis startPlanning
                 int holidayStartHour = (int) Duration.between(startPlanning, holiday.getStartDatePublicHolidays()).toHours();
-                int holidayEndHour = (int) Duration.between(startPlanning, holidayEndDate).toHours();
+                int holidayEndHour = (int) Duration.between(startPlanning, holiday.getEndDatePublicHolidays()).toHours();
 
-                // Contrainte : Si la date de début de l'activité est pendant les vacances
-                model.ifThen(
-                        model.and(
-                                model.arithm(startDates[i], ">=", holidayStartHour),
-                                model.arithm(startDates[i], "<", holidayEndHour)
-                        ),
-                        model.arithm(startDates[i], "=", holidayEndHour) // Décaler après la fin des vacances
-                );
+                // Contrainte : L'activité doit être entièrement avant ou après le jour férié
+                model.or(
+                        model.arithm(endDates[i], "<=", holidayStartHour),  // Activité terminée avant le jour férié
+                        model.arithm(startDates[i], ">=", holidayEndHour)   // Activité commencée après le jour férié
+                ).post();
             }
         }
+
+
+
 
         // Calcul des dates de fin maximales pour chaque employé
         int[] maxExistingEndsEmployers = new int[employers.size()];
@@ -327,6 +321,8 @@ private  final WorkTimeService workTimeService;
                 for (int i = 0; i < activities.size(); i++) {
                     Activity activity = activities.get(i);
 
+                    // ✅ Vider la liste existante ou l'initialiser à vide
+                    activity.setEmployees(new ArrayList<>());
                     // Mise à jour et affichage des employés affectés
                     boolean hasEmployers = false;
                     for (int j = 0; j < employers.size(); j++) {
@@ -334,7 +330,7 @@ private  final WorkTimeService workTimeService;
                             Optional<Employer> employerOpt = employerService.findById(employers.get(j).getId());
                             employerOpt.ifPresentOrElse(
                                     emp -> {
-                                        activity.setEmployees(new ArrayList<>(List.of(emp)));
+                                        activity.getEmployees().add(emp);
                                         System.out.print("Employé: " + emp.getFirstName() + ", ");
                                     },
                                     () -> { throw new RuntimeException("Employé non trouvé"); }
@@ -374,10 +370,7 @@ private  final WorkTimeService workTimeService;
                     // Ajout de l'activité aux résultats
                     results.add(activity);
                     activityService.updateActivity(activity);
-                    Optional<Activity> act = activityService.getActivityById(activity.getId());
-                    if (act.isPresent()) {
-                        System.out.println(act);
-                    }
+                    System.out.println("["+activity.getName()+" : " +activity.getPlannedStartDate() + ", " + activity.getPlannedEndDate() + "]");
                 }
 
                 // Mise à jour de la meilleure durée totale

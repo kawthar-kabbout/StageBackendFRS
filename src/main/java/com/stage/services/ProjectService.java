@@ -4,6 +4,7 @@ import com.stage.dto.ActiviteFrontDTO;
 import com.stage.dto.ProjetDTO;
 import com.stage.persistans.Activity;
 import com.stage.persistans.Project;
+import com.stage.persistans.enums.StatutActivity;
 import com.stage.repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -96,6 +97,20 @@ public class ProjectService {
             return true;
 
         }return  false;
+    }
+
+
+    public List<ProjetDTO>getAllProjectsNotFinished() {
+        List<Project>projects = projectRepository.findAll();
+        List<ProjetDTO> projetDTOs = new ArrayList<>();
+        for (Project project : projects) {
+            if (project.getArchived()==0 &&
+            project.getStatut()!= StatutActivity.Finish &&
+                    project.getStatut()!= StatutActivity.Cancel)
+            projetDTOs.add(getProjetDTOPalnification(project));
+
+        }
+        return projetDTOs;
     }
 
 }

@@ -58,7 +58,7 @@ public class Activity {
     private Long activityTemplateId;
     private LocalDateTime plannedStartDate;
     private LocalDateTime effectiveStartDate;
-    private LocalDateTime plannedEndDate;
+        private LocalDateTime plannedEndDate;
     private LocalDateTime effectiveEndDate;
     private Integer duration;
     private int employersNumber;

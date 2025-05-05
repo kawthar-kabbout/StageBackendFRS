@@ -10,10 +10,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -41,25 +44,25 @@ public class FirstTimeInit implements CommandLineRunner {
 
         WorkTime workTime = new WorkTime();
 
-        // Configuration des horaires de travail en semaine
-        workTime.setMorningSessionStart(LocalTime.of(8, 0));   // Matin : 08:00
-        workTime.setMorningSessionEnd(LocalTime.of(12, 0));     // Matin : 12:00
-        workTime.setAfternoonSessionStart(LocalTime.of(13, 0)); // Après-midi : 13:00
-        workTime.setAfternoonSessionEnd(LocalTime.of(17, 0));   // Après-midi : 17:00
+// Sessions standard de travail en semaine
+        workTime.setMorningSessionStart(LocalTime.of(8, 0));   // 08:00
+        workTime.setMorningSessionEnd(LocalTime.of(12, 0));   // 12:00
+        workTime.setAfternoonSessionStart(LocalTime.of(13, 0)); // 13:00
+        workTime.setAfternoonSessionEnd(LocalTime.of(16, 0));   // 16:00
 
-        // Configuration d'un jour de week-end travaillé (exemple : samedi)
-        workTime.setWeekendDay("Samedi");
-        workTime.setWeekendWorkTimeStart(LocalTime.of(9, 0));    // Samedi : 09:00
-        workTime.setWeekendWorkTimeEnd(LocalTime.of(13, 0));     // Samedi : 13:00
+// Jours travaillés : Lundi à Vendredi + Samedi optionnel
+        Set<DayOfWeek> workingDays = new HashSet<>();
+        workingDays.add(DayOfWeek.MONDAY);
+        workingDays.add(DayOfWeek.TUESDAY);
+        workingDays.add(DayOfWeek.WEDNESDAY);
+        workingDays.add(DayOfWeek.THURSDAY);
+        workingDays.add(DayOfWeek.FRIDAY);
+        workingDays.add(DayOfWeek.SATURDAY); // Ajout du samedi comme jour travaillé
 
-        // Liste des jours travaillés (ex: Lundi à Vendredi)
-        workTime.setWorkingDays(Arrays.asList("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"));
+        workTime.setWorkingDays(workingDays);
 
-        // Liste des jours non travaillés (ex: Dimanche + Samedi si pas de travail le week-end)
-        workTime.setNoWorkingDays(Arrays.asList("Dimanche"));
+// Enregistrer dans la base
         workTimeRepository.save(workTime);
-
-
 
         Skill s1 = null;
         Skill s2 = null;
@@ -193,7 +196,7 @@ public class FirstTimeInit implements CommandLineRunner {
 
         if (modeleActivityRepository.count() == 0) {
             if (p1 != null && p2 != null && s1 != null && s2 != null) {
-                activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, c1, s1,90,1);
+                activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, c1, s1,90,3);
                 activity2 = new Activity("Activité 2", ActivityType.EXTERNE, p2, c1, s1,50,3);
                 activity3 = new Activity("Activité 3", ActivityType.EXTERNE, p2, c2, s2,30,1);
                 activity4 = new Activity("Activité 4", ActivityType.EXTERNE, p2, null,s2,40,1);

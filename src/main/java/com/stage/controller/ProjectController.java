@@ -4,6 +4,7 @@ import com.stage.dto.ActiviteFrontDTO;
 import com.stage.dto.ActivityDTO;
 import com.stage.dto.ProjetDTO;
 import com.stage.persistans.Activity;
+import com.stage.persistans.DependanceActivity;
 import com.stage.persistans.Project;
 import com.stage.repositories.ProjectRepository;
 import com.stage.services.ActivityService;
@@ -120,9 +121,13 @@ public class ProjectController {
                     .body("Erreur lors de la récupération de la structure WBS.");
         }
 
-//    activityService.updateActivitiesCloningRoot(activitesFrontDTO, newProject.getId());
-
-
+List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId());
+        for (Activity a : newacts) {
+            a.setActivityTemplateId(null);
+            activityService.updateActivity(a);
+        }
+        List<DependanceActivity>deps=dependanceActivityService
+                .getDependenceActivitiesByProjectId(newProject.getId());
         return ResponseEntity.ok(newActivitiesDTO);
     }
 
@@ -184,5 +189,12 @@ public class ProjectController {
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/getAllProjects/gantt")
+    private ResponseEntity<List<ProjetDTO>> getallProjectsNotFinished() {
+
+        List<ProjetDTO> res = this.projectService.getAllProjectsNotFinished();
+        return ResponseEntity.ok(res);
     }
 }

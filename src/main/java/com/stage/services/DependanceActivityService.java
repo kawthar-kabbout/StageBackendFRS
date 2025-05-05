@@ -56,7 +56,13 @@ public DependanceActivity findByTargetAndProdesesseur( Activity targetActivity, 
 
     public DependanceActivity save(DependanceActivity modelDependanceActivity) {
         if (modelDependanceActivity.getTargetActivity().getId() != modelDependanceActivity.getPredecessorActivity().getId()
-                && !existsDependance(modelDependanceActivity.getPredecessorActivity().getId() ,modelDependanceActivity.getTargetActivity().getId())) {
+                && !existsDependance(
+                        modelDependanceActivity.getPredecessorActivity().getId()
+                ,modelDependanceActivity.getTargetActivity().getId())  /// inverce
+        && !existsDependance( modelDependanceActivity.getTargetActivity().getId() ,
+                modelDependanceActivity.getPredecessorActivity().getId()
+                ))
+        {
             // Vérifier si targetActivity existe
             if (modelDependanceActivity.getTargetActivity() != null) {
                 Optional<Activity> targetActivity = activityRepository.findById(modelDependanceActivity.getTargetActivity().getId());
@@ -76,16 +82,43 @@ public DependanceActivity findByTargetAndProdesesseur( Activity targetActivity, 
             // Sauvegarder la dépendance
             return dependanceActivityRepository.save(modelDependanceActivity);
         } else {
-            throw new IllegalArgumentException("error meme activity ou bien dependency exist");
+            return null;
         }
     }
 
 
 
-    public DependanceActivity update(DependanceActivity modelDependanceActivity) {
+    public DependanceActivity update(Long id, DependanceActivity dependanceActivity) {
+        Long predecessorId = dependanceActivity.getPredecessorActivity().getId();
+        Long targetId = dependanceActivity.getTargetActivity().getId();
 
-        return dependanceActivityRepository.save(modelDependanceActivity);
+        // Vérifie si une dépendance identique existe déjà (même prédécesseur + même cible)
+    DependanceActivity existingSameDepOpt =
+                dependanceActivityRepository.
+                        findByTargetActivityAndPredecessorActivity(dependanceActivity.getPredecessorActivity()
+                                , dependanceActivity.getTargetActivity());
+
+        if (existingSameDepOpt !=null && !existingSameDepOpt.getId().equals(id)) {
+            // Une autre dépendance (différente de celle qu'on veut modifier) existe déjà
+            return null;
+        }
+
+        // Recherche de la dépendance à modifier
+        Optional<DependanceActivity> optionalDep = dependanceActivityRepository.findById(id);
+        if (optionalDep.isPresent()) {
+            DependanceActivity existingDep = optionalDep.get();
+            existingDep.setTargetActivity(dependanceActivity.getTargetActivity());
+            existingDep.setPredecessorActivity(dependanceActivity.getPredecessorActivity());
+            existingDep.setDelay(dependanceActivity.getDelay());
+            existingDep.setDependencyType(dependanceActivity.getDependencyType());
+            existingDep.setArchived(dependanceActivity.getArchived());
+
+            return dependanceActivityRepository.save(existingDep);
+        }
+
+        return null; // Dépendance à modifier non trouvée
     }
+
     public void deleteByTagetActivity(Activity targetActivity) {
       List<DependanceActivity> deps=  dependanceActivityRepository.findByTargetActivity(targetActivity);
       for (DependanceActivity dep : deps) {
@@ -119,8 +152,12 @@ public DependanceActivity findByTargetAndProdesesseur( Activity targetActivity, 
     public boolean existsDependance(Long target, Long predecessor ) {
       if(dependanceActivityRepository.countByTargetAndPredecessorNative(target, predecessor) >=1)
 
-      {  System.out.println("Target Activity ID: " + target);
-          System.out.println("Predecessor Activity ID: " + predecessor);return true;}
+      {  System.out.println("");
+          System.out.println("");
+          System.out.println("Target Activity ID: " + target);
+          System.out.println("Predecessor Activity ID: " + predecessor);
+          return true;
+      }
       return false;
     }
 

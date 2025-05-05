@@ -85,11 +85,14 @@ public class DependanceActivityController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<DependanceActivity> updateModelDependanceActivity(@PathVariable Long id ,@RequestBody DependanceActivity modelDependanceActivity) {
+    public ResponseEntity<DependanceActivity> updateModelDependanceActivity(@PathVariable Long id ,@RequestBody DependanceActivity newDep) {
      Optional<DependanceActivity> modelDependanceActivityOptional = dependanceActivityService.findById(id);
      if (modelDependanceActivityOptional.isPresent()) {
-         modelDependanceActivity = dependanceActivityService.update(modelDependanceActivity);
-         return ResponseEntity.ok(modelDependanceActivity);
+     DependanceActivity    depUpdated = dependanceActivityService.update( id,newDep);
+     if (depUpdated == null) {
+         return ResponseEntity.notFound().build();
+     }
+         return ResponseEntity.ok(depUpdated);
      } else {
          return ResponseEntity.notFound().build();
      }
