@@ -2,19 +2,17 @@ package com.stage.dto;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class HolidaysDTO {
+public class VacationDTO {
 
 
     private Long id;
 
     private String name;
-    private Long startDatePublicHolidays;
+    private Long startDate;
     private int  nbdays;
 }

@@ -3,16 +3,11 @@ package com.stage.services;
 
 import com.stage.dto.ActiviteFrontDTO;
 import com.stage.dto.ActivityDTO;
-import com.stage.dto.EmployerDTo;
 import com.stage.persistans.*;
-import com.stage.persistans.enums.StatutActivity;
+import com.stage.persistans.enums.Statut;
 import com.stage.persistans.enums.ActivityType;
 import com.stage.repositories.ActivityRepository;
 import com.stage.repositories.DependanceActivityRepository;
-import com.stage.repositories.SkillRepository;
-import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotBlank;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +22,8 @@ public class ActivityService {
 
 
 
-    public List<StatutActivity>getStatutActivities(){
-        return   Arrays.asList(StatutActivity.values());
+    public List<Statut>getStatutActivities(){
+        return   Arrays.asList(Statut.values());
     }
     public List<ActivityType> getTypes() {
         return Arrays.asList(ActivityType.values());
@@ -278,7 +273,7 @@ public Boolean deleteActivitiesByProject(Long projectId) {
         for (Activity activity : activities) {
             if(activity.getEmployees()!=null){
             for (Employer e :activity.getEmployees()){
-                if (employer.getId().equals(e.getId()) && activity.getStatut() != StatutActivity.Finish)
+                if (employer.getId().equals(e.getId()) && activity.getStatut() != Statut.Finish)
                         result.add(activity);
 
             }
@@ -292,7 +287,7 @@ public Boolean deleteActivitiesByProject(Long projectId) {
         for (Activity activity : activities) {
             if(activity.getMachine()!=null
             && machine.getId().equals(activity.getMachine().getId())
-                    && activity.getStatut()!=StatutActivity.Finish)
+                    && activity.getStatut()!=Statut.Finish)
 
                result.add(activity);
 
@@ -330,7 +325,7 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject,
                 .plannedStartDate(null)
                 .plannedEndDate(null)
                 .effectiveStartDate(null)
-                .statut(StatutActivity.Pending)
+                .statut(Statut.Pending)
                 .skill(oldActivity.getSkill())
                 .capabilityMachine(oldActivity.getCapabilityMachine())
                 .activityTemplateId(oldActivity.getId())

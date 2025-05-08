@@ -4,14 +4,13 @@ import com.stage.dto.ActivityDTO;
 import com.stage.persistans.Activity;
 import com.stage.persistans.DependanceActivity;
 import com.stage.persistans.Project;
-import com.stage.persistans.enums.StatutActivity;
+import com.stage.persistans.enums.Statut;
 import com.stage.persistans.enums.ActivityType;
 import com.stage.services.ActivityService;
 import com.stage.services.DependanceActivityService;
 import com.stage.services.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -162,7 +161,7 @@ public class ActivityController {
     }
 
     @GetMapping("/statuts")
-    public ResponseEntity<List<StatutActivity>> getStatutActivities() {
+    public ResponseEntity<List<Statut>> getStatutActivities() {
         return ResponseEntity.ok(activityService.getStatutActivities());
     }
 

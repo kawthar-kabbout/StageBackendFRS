@@ -1,8 +1,8 @@
 package com.stage.services;
 
 import com.stage.dto.PublicHolidaysDTO;
-import com.stage.persistans.PublicHolidays;
-import com.stage.repositories.PublicHolidaysRepository;
+import com.stage.persistans.Vacation;
+import com.stage.repositories.VacationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,27 +13,27 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class PublicHolidaysService {
-    private final PublicHolidaysRepository publicHolidaysRepository;
+public class VacationService {
+    private final VacationRepository publicHolidaysRepository;
 
 
-    public List<PublicHolidays> findAll() {
+    public List<Vacation> findAll() {
         return publicHolidaysRepository.findAll();
     }
-   public Optional<PublicHolidays> findById(Long id) {
+   public Optional<Vacation> findById(Long id) {
         return publicHolidaysRepository.findById(id);
    }
-    public PublicHolidays save(PublicHolidays publicHolidays) {
+    public Vacation save(Vacation publicHolidays) {
 
 
 
         return publicHolidaysRepository.save(publicHolidays);
     }
-        public PublicHolidays update(PublicHolidays publicHolidays, Long id) {
+        public Vacation update(Vacation publicHolidays, Long id) {
 
             if (publicHolidaysRepository.findById(id).isPresent()) {
-                PublicHolidays p = publicHolidaysRepository.findById(id).get();
-                p.setStartDatePublicHolidays(publicHolidays.getStartDatePublicHolidays());
+                Vacation p = publicHolidaysRepository.findById(id).get();
+                p.setStartDate(publicHolidays.getStartDate());
                 p.setNbdays(publicHolidays.getNbdays());
                 p.setName(publicHolidays.getName());
                 return publicHolidaysRepository.save(p);
@@ -44,19 +44,19 @@ public class PublicHolidaysService {
 
 
     public List<PublicHolidaysDTO> findAllPublicHolidaysDTO() {
-        List<PublicHolidays> publicHolidays = publicHolidaysRepository.findAll();
+        List<Vacation> publicHolidays = publicHolidaysRepository.findAll();
         List<PublicHolidaysDTO> publicHolidaysDTOs = new ArrayList<>();
 
-        for (PublicHolidays publicHoliday : publicHolidays) {
+        for (Vacation publicHoliday : publicHolidays) {
             PublicHolidaysDTO dto = new PublicHolidaysDTO();
 
             dto.setId(publicHoliday.getId());
             dto.setName(publicHoliday.getName());
-            dto.setStartDatePublicHolidays(publicHoliday.getStartDatePublicHolidays());
+            dto.setStartDatePublicHolidays(publicHoliday.getStartDate());
 
             // Calcul de la date de fin :
             // Ajout des jours fériés + Soustrait 1 minute pour couvrir l'entièreté du dernier jour
-            LocalDateTime endDate = publicHoliday.getStartDatePublicHolidays()
+            LocalDateTime endDate = publicHoliday.getStartDate()
                     .plusDays(publicHoliday.getNbdays())  // Ajout du nombre de jours
                     .minusMinutes(1);                     // Soustrait 1 minute au lieu de 1 seconde
             dto.setEndDatePublicHolidays(endDate);

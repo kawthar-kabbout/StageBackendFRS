@@ -1,6 +1,6 @@
 package com.stage.persistans.enums;
 
-public enum StatutActivity {
+public enum Statut {
     Pending,
     Start,
     Finish,

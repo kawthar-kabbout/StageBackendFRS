@@ -1,7 +1,7 @@
 package com.stage.persistans;
 
 import com.stage.persistans.enums.ActivityType;
-import com.stage.persistans.enums.StatutActivity;
+import com.stage.persistans.enums.Statut;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -30,7 +30,7 @@ public class Activity {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    private StatutActivity statut;
+    private Statut statut;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -94,7 +94,7 @@ public class Activity {
     }
 
 
-    public Activity(@NonNull String name, StatutActivity statut, ActivityType typeActivity, Skill skill, @NonNull Project project, CapabilityMachine capabilityMachine, int employersNumber, Integer duration) {
+    public Activity(@NonNull String name, Statut statut, ActivityType typeActivity, Skill skill, @NonNull Project project, CapabilityMachine capabilityMachine, int employersNumber, Integer duration) {
         this.name = name;
         this.statut = statut;
         this.typeActivity = typeActivity;

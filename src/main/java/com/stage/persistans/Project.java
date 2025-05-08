@@ -1,6 +1,6 @@
 package com.stage.persistans;
 
-import com.stage.persistans.enums.StatutActivity;
+import com.stage.persistans.enums.Statut;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,7 +20,7 @@ public class Project {
     @Column(unique = true, nullable = false)
     private String name;
     private Long projectTemplateId;
-    private StatutActivity statut;
+    private Statut statut;
 
     public Project(@NonNull String name) {
         this.name = name;

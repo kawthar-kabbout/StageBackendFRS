@@ -121,6 +121,9 @@ public class ProjectController {
                     .body("Erreur lors de la récupération de la structure WBS.");
         }
 
+  /*      newProject.setProjectTemplateId(null);
+        projectService.update(newProject);
+        */
 List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId());
         for (Activity a : newacts) {
             a.setActivityTemplateId(null);

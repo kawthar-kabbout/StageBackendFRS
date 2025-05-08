@@ -1,6 +1,5 @@
 package com.stage.persistans;
 
-import com.stage.persistans.enums.MachineType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,12 +12,12 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class PublicHolidays {
+public class Vacation {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     private String name;
-    private LocalDateTime startDatePublicHolidays;
+    private LocalDateTime startDate;
     private int nbdays;
 
     @Column(updatable = false)
@@ -42,10 +41,10 @@ public class PublicHolidays {
     }
 
 
-    public PublicHolidays(Long id, String name, LocalDateTime startDatePublicHolidays, int nbdays) {
+    public Vacation(Long id, String name, LocalDateTime startDate, int nbdays) {
         this.id = id;
         this.name = name;
-        this.startDatePublicHolidays = startDatePublicHolidays;
+        this.startDate = startDate;
         this.nbdays = nbdays;
     }
 }

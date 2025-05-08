@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +24,7 @@ private  final  EmployerService employerService;
 private final ActivityService activityService;
 private final MachineService machineService;
 private final DependanceActivityService dependanceActivityService;
-private final PublicHolidaysService publicHolidaysService;
+private final VacationService publicHolidaysService;
     public List<Activity> chocosolver(List<Project> projects, LocalDateTime startPlanning) {
         System.out.println("startPlanning: " + startPlanning);
 

@@ -1,8 +1,8 @@
 package com.stage.controller;
 
-import com.stage.dto.HolidaysDTO;
-import com.stage.persistans.PublicHolidays;
-import com.stage.services.PublicHolidaysService;
+import com.stage.dto.VacationDTO;
+import com.stage.persistans.Vacation;
+import com.stage.services.VacationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,30 +19,30 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/publicHolidays")
 @RequiredArgsConstructor
-public class PublicHolidaysController {
-    private final PublicHolidaysService publicHolidaysService;
+public class VacationController {
+    private final VacationService publicHolidaysService;
 
     @GetMapping
-    public ResponseEntity<List<PublicHolidays>>  getAllPublicHolidays() {
-        List<PublicHolidays> publicHolidays = publicHolidaysService.findAll();
+    public ResponseEntity<List<Vacation>>  getAllPublicHolidays() {
+        List<Vacation> publicHolidays = publicHolidaysService.findAll();
         return new ResponseEntity<>(publicHolidays, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PublicHolidays> getPublicHolidaysById(@PathVariable Long id) {
-       Optional<PublicHolidays>  publicHolidays = publicHolidaysService.findById(id);
+    public ResponseEntity<Vacation> getPublicHolidaysById(@PathVariable Long id) {
+       Optional<Vacation>  publicHolidays = publicHolidaysService.findById(id);
        if (publicHolidays.isPresent()) {
            return new ResponseEntity<>(publicHolidays.get(), HttpStatus.OK);
        }
        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody HolidaysDTO holoholiday) {
+    public ResponseEntity<?> save(@RequestBody VacationDTO holoholiday) {
         try {
 
 
             // Convertir le timestamp en LocalDate (date sans heure)
-            Long startTimestampMillis = holoholiday.getStartDatePublicHolidays() * 1000;
+            Long startTimestampMillis = holoholiday.getStartDate() * 1000;
             LocalDate startDate = Instant.ofEpochMilli(startTimestampMillis)
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
@@ -50,7 +50,7 @@ public class PublicHolidaysController {
             // Convertir LocalDate en LocalDateTime avec l'heure fixée à 00:00:00
             LocalDateTime startDateTime = startDate.atStartOfDay();
 
-                PublicHolidays publicHolidays = new PublicHolidays(
+                Vacation publicHolidays = new Vacation(
                         holoholiday.getId(),
                         holoholiday.getName(),
                         startDateTime,
@@ -58,7 +58,7 @@ public class PublicHolidaysController {
                 );
 
                 System.out.println(publicHolidays);
-            PublicHolidays saved = publicHolidaysService.save(publicHolidays);
+            Vacation saved = publicHolidaysService.save(publicHolidays);
             return new ResponseEntity<>(saved, HttpStatus.CREATED);
         } catch (RuntimeException ex) {
             return new ResponseEntity<>(Map.of("message", ex.getMessage()), HttpStatus.BAD_REQUEST);
@@ -67,10 +67,10 @@ public class PublicHolidaysController {
 
 
 @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody HolidaysDTO holoholiday) {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody VacationDTO holoholiday) {
     if (publicHolidaysService.findById(id).isPresent()) {
 
-        Long startTimestampMillis = holoholiday.getStartDatePublicHolidays() * 1000;
+        Long startTimestampMillis = holoholiday.getStartDate() * 1000;
 
 
         LocalDateTime start = Instant.ofEpochMilli(startTimestampMillis)
@@ -79,14 +79,14 @@ public class PublicHolidaysController {
 
 
 
-        PublicHolidays publicHolidays = new PublicHolidays(
+        Vacation publicHolidays = new Vacation(
                 holoholiday.getId(),
                 holoholiday.getName(),
                 start,
                 holoholiday.getNbdays()
         );
 
-        PublicHolidays hol = publicHolidaysService.update(publicHolidays , id);
+        Vacation hol = publicHolidaysService.update(publicHolidays , id);
         if (hol != null) {
             return new ResponseEntity<>(hol, HttpStatus.OK);
         }

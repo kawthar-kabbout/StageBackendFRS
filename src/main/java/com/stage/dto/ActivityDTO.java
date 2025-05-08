@@ -4,15 +4,11 @@ import com.stage.persistans.Activity;
 import com.stage.persistans.Employer;
 import com.stage.persistans.Machine;
 import com.stage.persistans.Project;
-import com.stage.persistans.enums.StatutActivity;
+import com.stage.persistans.enums.Statut;
 import com.stage.persistans.enums.ActivityType;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +19,7 @@ import java.util.Map;
 public class ActivityDTO {
     private Long id;
     private String name;
-    private StatutActivity statutActivity;
+    private Statut statutActivity;
     private ActivityType typeActivity;
     private Long parentActivityId;
     private Project projectId;

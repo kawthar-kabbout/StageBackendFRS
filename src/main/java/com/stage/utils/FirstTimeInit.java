@@ -3,7 +3,6 @@ package com.stage.utils;
 import com.stage.persistans.*;
 import com.stage.persistans.enums.DependencyType;
 import com.stage.persistans.enums.MachineType;
-import com.stage.persistans.enums.StatutActivity;
 import com.stage.persistans.enums.ActivityType;
 import com.stage.repositories.*;
 import lombok.RequiredArgsConstructor;
@@ -11,9 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
