@@ -75,21 +75,7 @@ private final VacationService publicHolidaysService;
             }
         }
 
-        // Contrainte : Ajuster les dates si elles tombent pendant les vacances publiques
-        // Contrainte : Une activité ne doit pas chevaucher un jour férié
-        for (int i = 0; i < activities.size(); i++) {
-            for (PublicHolidaysDTO holiday : holidays) {
-                // Convertir les dates du jour férié en heures depuis startPlanning
-                int holidayStartHour = (int) Duration.between(startPlanning, holiday.getStartDatePublicHolidays()).toHours();
-                int holidayEndHour = (int) Duration.between(startPlanning, holiday.getEndDatePublicHolidays()).toHours();
 
-                // Contrainte : L'activité doit être entièrement avant ou après le jour férié
-                model.or(
-                        model.arithm(endDates[i], "<=", holidayStartHour),  // Activité terminée avant le jour férié
-                        model.arithm(startDates[i], ">=", holidayEndHour)   // Activité commencée après le jour férié
-                ).post();
-            }
-        }
 
 
 
@@ -359,9 +345,12 @@ private final VacationService publicHolidaysService;
                     }
 
                     // Mise à jour des dates planifiées
-                    activity.setPlannedStartDate(startPlanning.plusHours(startDates[i].getValue()));
-                    activity.setPlannedEndDate(startPlanning.plusHours(endDates[i].getValue()));
+                    LocalDateTime startDate = startPlanning.plusHours(startDates[i].getValue());
+                    int duree = activity.getDuration();
+                    LocalDateTime endDate = PlanningUtils.calculerDateFinEffective(startDate, duree, holidays);
 
+                    activity.setPlannedStartDate(startDate);
+                    activity.setPlannedEndDate(endDate);
                     // Affichage des dates de début et de fin
                     System.out.println("[Start: " + startDates[i].getValue() + ", End: " + endDates[i].getValue() + "]");
 

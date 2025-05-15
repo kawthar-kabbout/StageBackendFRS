@@ -1,6 +1,7 @@
 package com.stage.persistans;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,10 @@ public class CapabilityMachine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @NonNull
+    @NotBlank
+    @Column(nullable = false)
+    private String description;
 
     @Column(updatable = false)
     private LocalDateTime createdDate;
@@ -25,6 +30,7 @@ public class CapabilityMachine {
 
     @Column(nullable = false)
     private int archived = 0;
+
 
 
     @PrePersist
@@ -38,4 +44,8 @@ public class CapabilityMachine {
         updatedDate = LocalDateTime.now();
     }
 
+    public CapabilityMachine(String name, @NonNull String description) {
+        this.name = name;
+        this.description = description;
+    }
 }

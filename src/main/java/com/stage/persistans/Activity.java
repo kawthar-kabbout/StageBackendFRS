@@ -105,6 +105,26 @@ public class Activity {
         this.duration = duration;
     }
 
+    public Activity(@NonNull String name, ActivityType typeActivity, @NonNull Project project ,Integer duration) {
+        this.name = name;
+        this.typeActivity = typeActivity;
+        this.project = project;
+        this.duration = duration;
+    }
+
+
+    public Activity(@NonNull String name, Statut statut, ActivityType typeActivity, Activity parentActivity, @NonNull Project project, Skill skill, CapabilityMachine capabilityMachine, Integer duration, int employersNumber) {
+        this.name = name;
+        this.statut = statut;
+        this.typeActivity = typeActivity;
+        this.parentActivity = parentActivity;
+        this.project = project;
+        this.skill = skill;
+        this.capabilityMachine = capabilityMachine;
+        this.duration = duration;
+        this.employersNumber = employersNumber;
+    }
+
     public <E> Activity(String s, Activity activity1, ActivityType activityType, Project p2, List<E> s2) {
     }
 

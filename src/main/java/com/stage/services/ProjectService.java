@@ -57,6 +57,7 @@ public class ProjectService {
             newProject = new Project();
             newProject.setName(newName);
             newProject.setProjectTemplateId(projectTemplate.getId());
+            newProject.setTemplate(1);
             if (projectRepository.save(newProject) != null) {
                 activityService.cloneActivityProjectRootTree(projectTemplate, projectRepository.save(newProject),activitesFrontDTO);
             }
@@ -99,13 +100,14 @@ public class ProjectService {
     }
 
 
-    public List<ProjetDTO>getAllProjectsNotFinished() {
+    public List<ProjetDTO>getAllProjectsNotFinishedAndIsPlanned() {
         List<Project>projects = projectRepository.findAll();
         List<ProjetDTO> projetDTOs = new ArrayList<>();
         for (Project project : projects) {
             if (project.getArchived()==0 &&
             project.getStatut()!= Statut.Finish &&
-                    project.getStatut()!= Statut.Cancel)
+                    project.getStatut()!= Statut.Cancel
+            && project.getIsPlanned()==0)
             projetDTOs.add(getProjetDTOPalnification(project));
 
         }

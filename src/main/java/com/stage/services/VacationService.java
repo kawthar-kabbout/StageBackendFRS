@@ -52,17 +52,17 @@ public class VacationService {
 
             dto.setId(publicHoliday.getId());
             dto.setName(publicHoliday.getName());
-            dto.setStartDatePublicHolidays(publicHoliday.getStartDate());
+            dto.setStartDateHolidays(publicHoliday.getStartDate());
 
             // Calcul de la date de fin :
             // Ajout des jours fériés + Soustrait 1 minute pour couvrir l'entièreté du dernier jour
             LocalDateTime endDate = publicHoliday.getStartDate()
                     .plusDays(publicHoliday.getNbdays())  // Ajout du nombre de jours
                     .minusMinutes(1);                     // Soustrait 1 minute au lieu de 1 seconde
-            dto.setEndDatePublicHolidays(endDate);
+            dto.setEndDateHolidays(endDate);
 
             publicHolidaysDTOs.add(dto);
-            System.out.println("holidaysDTO: " + dto.getStartDatePublicHolidays() + ", " + dto.getEndDatePublicHolidays());
+            System.out.println("holidaysDTO: " + dto.getStartDateHolidays() + ", " + dto.getEndDateHolidays());
         }
 
         return publicHolidaysDTOs;

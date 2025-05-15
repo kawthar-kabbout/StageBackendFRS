@@ -40,6 +40,20 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
+
+
+    @GetMapping("/IsPlanned")
+    public ResponseEntity<List<Project>> getProjectsIsPlanned() {
+        List<Project> projects = projectService.getALlProject();
+        List<Project> projectsPlanned = new ArrayList<>();
+        for (Project project : projects) {
+            if (project.getIsPlanned()==0){
+                projectsPlanned.add(project);
+            }
+        }
+        return ResponseEntity.ok(projectsPlanned);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Project> getProjectById(@PathVariable Long id) {
         Optional<Project> project = projectService.getProjectById(id);
@@ -121,9 +135,9 @@ public class ProjectController {
                     .body("Erreur lors de la récupération de la structure WBS.");
         }
 
-  /*      newProject.setProjectTemplateId(null);
+        newProject.setProjectTemplateId(null);
         projectService.update(newProject);
-        */
+
 List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId());
         for (Activity a : newacts) {
             a.setActivityTemplateId(null);
@@ -164,6 +178,12 @@ List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId(
             return ResponseEntity.notFound().build();
         }
 
+        for (Project p: projects){
+            p.setIsPlanned(0);
+            projectService.update(p);
+
+        }
+
         return ResponseEntity.ok(result);
     }
 
@@ -195,9 +215,10 @@ List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId(
     }
 
     @GetMapping("/getAllProjects/gantt")
-    private ResponseEntity<List<ProjetDTO>> getallProjectsNotFinished() {
+    private ResponseEntity<List<ProjetDTO>> getallProjectsNotFinishedAndIsPlanned() {
 
-        List<ProjetDTO> res = this.projectService.getAllProjectsNotFinished();
+        List<ProjetDTO> res = this.projectService.getAllProjectsNotFinishedAndIsPlanned();
+
         return ResponseEntity.ok(res);
     }
 }

@@ -16,6 +16,6 @@ public class PublicHolidaysDTO {
 
     private Long id;
     private String name;
-    private LocalDateTime startDatePublicHolidays;
-    private LocalDateTime endDatePublicHolidays;
+    private LocalDateTime startDateHolidays;
+    private LocalDateTime endDateHolidays;
 }
