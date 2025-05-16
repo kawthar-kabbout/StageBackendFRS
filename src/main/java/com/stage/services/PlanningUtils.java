@@ -1,10 +1,16 @@
 package com.stage.services;
 
 import com.stage.dto.PublicHolidaysDTO;
+import com.stage.persistans.DailyWorkTime;
+import com.stage.persistans.WorkTime;
+import lombok.RequiredArgsConstructor;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class PlanningUtils {
     public static LocalDateTime calculerDateFinEffective(LocalDateTime startDate, int dureeHeures, List<PublicHolidaysDTO> joursFeries) {
         LocalDateTime current = startDate;

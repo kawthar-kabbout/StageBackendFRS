@@ -1,6 +1,7 @@
 package com.stage.utils;
 
 import com.stage.persistans.*;
+import com.stage.persistans.DailyWorkTime;
 import com.stage.persistans.enums.DependencyType;
 import com.stage.persistans.enums.MachineType;
 import com.stage.persistans.enums.ActivityType;
@@ -12,9 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -28,6 +27,7 @@ public class FirstTimeInit implements CommandLineRunner {
     private final MachineRepository machineRepository;
     private final  CapabilityMachineRepository capabilityMachineRepository;
     private final WorkTimeRepository workTimeRepository;
+    private final DailyWorkTimeRepository dailyWorkTimeRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -38,29 +38,40 @@ public class FirstTimeInit implements CommandLineRunner {
 
 
 
+        // Création de la liste des horaires par jour
+        List<DailyWorkTime> dailyList = new ArrayList<>();
 
+// Jours du lundi au vendredi : 08:00–12:00 et 13:00–17:00
+        for (DayOfWeek day : List.of(
+                DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY)) {
+            DailyWorkTime dwt = new DailyWorkTime();
+            dwt.setDay(day);
+            dwt.setMorningStart(LocalTime.of(8, 0));
+            dwt.setMorningEnd(LocalTime.of(12, 0));
+            dwt.setAfternoonStart(LocalTime.of(13, 0));
+            dwt.setAfternoonEnd(LocalTime.of(17, 0));
+            dailyList.add(dwt);
+        }
 
+// Samedi : 08:00–12:00 et 13:00–15:00
+            DailyWorkTime saturday = new DailyWorkTime();
+            saturday.setDay(DayOfWeek.SATURDAY);
+            saturday.setMorningStart(LocalTime.of(8, 0));
+            saturday.setMorningEnd(LocalTime.of(12, 0));
+            saturday.setAfternoonStart(LocalTime.of(13, 0));
+            saturday.setAfternoonEnd(LocalTime.of(15, 0));
+            dailyList.add(saturday);
+
+// Étape 1 : Sauvegarder chaque DailyWorkTime individuellement
+        List<DailyWorkTime> savedDailyWorkTimes = dailyWorkTimeRepository.saveAll(dailyList);
+
+// Étape 2 : Créer le WorkTime et lui attacher les horaires sauvegardés
         WorkTime workTime = new WorkTime();
+        workTime.setDailyWorkTimes(savedDailyWorkTimes); // maintenant avec ID valide
 
-// Sessions standard de travail en semaine
-        workTime.setMorningSessionStart(LocalTime.of(8, 0));   // 08:00
-        workTime.setMorningSessionEnd(LocalTime.of(12, 0));   // 12:00
-        workTime.setAfternoonSessionStart(LocalTime.of(13, 0)); // 13:00
-        workTime.setAfternoonSessionEnd(LocalTime.of(16, 0));   // 16:00
-
-// Jours travaillés : Lundi à Vendredi + Samedi optionnel
-        Set<DayOfWeek> workingDays = new HashSet<>();
-        workingDays.add(DayOfWeek.MONDAY);
-        workingDays.add(DayOfWeek.TUESDAY);
-        workingDays.add(DayOfWeek.WEDNESDAY);
-        workingDays.add(DayOfWeek.THURSDAY);
-        workingDays.add(DayOfWeek.FRIDAY);
-        workingDays.add(DayOfWeek.SATURDAY); // Ajout du samedi comme jour travaillé
-
-        workTime.setWorkingDays(workingDays);
-
-// Enregistrer dans la base
-        workTimeRepository.save(workTime);
+// Étape 3 : Sauvegarder WorkTime
+        workTime = workTimeRepository.save(workTime);
 
         Skill s1 = null;
         Skill s2 = null;
@@ -102,6 +113,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer1.setAddress("123 Main St");
                 employer1.setGrade("Senior");
                 employer1.setSkills(List.of(s1));
+                employer1.setWorkTime(workTime);
                 employer1.setCapabilityMachine(List.of(c1));
 
                 employer2 = new Employer();
@@ -111,6 +123,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer2.setAddress("456 Elm St");
                 employer2.setGrade("Junior");
                 employer2.setSkills(List.of(s2,s1));
+                employer2.setWorkTime(workTime);
                 employer2.setCapabilityMachine(List.of(c2,c1));
 
 
@@ -121,6 +134,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer3.setAddress("456 Elm St");
                 employer3.setGrade("Junior");
                 employer3.setSkills(List.of(s2));
+                employer3.setWorkTime(workTime);
                 employer3.setCapabilityMachine(List.of(c2));
 
                 employer4 = new Employer();
@@ -130,6 +144,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer4.setAddress("456 Elm St");
                 employer4.setGrade("Junior");
                 employer4.setSkills(List.of(s2,s1));
+                employer4.setWorkTime(workTime);
                 employer4.setCapabilityMachine(List.of(c2,c1));
 
 
@@ -140,6 +155,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer5.setAddress("456 Elm St");
                 employer5.setGrade("Junior");
                 employer5.setSkills(List.of(s3));
+                employer5.setWorkTime(workTime);
                 employerRepository.save(employer1);
                 employerRepository.save(employer2);
                 employerRepository.save(employer3);

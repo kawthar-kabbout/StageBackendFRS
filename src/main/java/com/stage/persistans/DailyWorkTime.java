@@ -1,28 +1,32 @@
 package com.stage.persistans;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalTime;
 
 @Getter
 @Setter
+
 @ToString
-@Entity
-@NoArgsConstructor
 @AllArgsConstructor
-public class WorkTime {
+@NoArgsConstructor
+@Entity
+public class DailyWorkTime {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
-    @JoinColumn(name = "work_time_id")
-    private List<DailyWorkTime> dailyWorkTimes;
+    @Enumerated(EnumType.STRING)
+    private DayOfWeek day;
 
+    private LocalTime morningStart;
+    private LocalTime morningEnd;
+    private LocalTime afternoonStart;
+    private LocalTime afternoonEnd;
 
     @Column(updatable = false)
     private LocalDateTime createdDate;
@@ -43,8 +47,5 @@ public class WorkTime {
     protected void onUpdate() {
         updatedDate = LocalDateTime.now();
     }
-
-
-
 
 }

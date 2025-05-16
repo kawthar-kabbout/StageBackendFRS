@@ -1,8 +1,10 @@
 package com.stage.services;
 
 import com.stage.dto.EmployerDTo;
+import com.stage.dto.WorkTimeDTO;
 import com.stage.persistans.Activity;
 import com.stage.persistans.Employer;
+import com.stage.persistans.WorkTime;
 import com.stage.repositories.ActivityRepository;
 import com.stage.repositories.EmployerRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import java.util.Optional;
 public class EmployerService {
     private final EmployerRepository employerRepository;
 private final ActivityService activityService;
+private final WorkTimeService workTimeService;
 
     public EmployerDTo getEmployerDTo(Employer employer) {
         EmployerDTo employerDTo = new EmployerDTo(
@@ -68,7 +71,11 @@ public Employer findEmployerByPhone(String phone) {
         return null;
 }
     public Employer save(Employer employer) {
-       return employerRepository.save(employer);
+
+        WorkTime workTime= workTimeService.getWorkTimeById(1L);
+        employer.setWorkTime(workTime);
+
+        return employerRepository.save(employer);
     }
 
     public Employer update(Employer employer) {

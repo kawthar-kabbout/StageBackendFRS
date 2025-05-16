@@ -46,6 +46,9 @@ public class Employer {
     @NonNull
     private Boolean status  =true;
 
+    @ManyToOne
+    private WorkTime workTime;
+
     @Column(updatable = false)
     private LocalDateTime createdDate;
 
