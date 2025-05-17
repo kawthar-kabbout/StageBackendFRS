@@ -19,7 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class ChocosolverService {
-
+private final WorkTimeService workTimeService;
 private  final  EmployerService employerService;
 private final ActivityService activityService;
 private final MachineService machineService;
@@ -29,6 +29,7 @@ private final VacationService publicHolidaysService;
         System.out.println("startPlanning: " + startPlanning);
 
         // Récupération des données initiales
+        WorkTime workTime = workTimeService.getWorkTimeById(1L);
         List<PublicHolidaysDTO> holidays = publicHolidaysService.findAllPublicHolidaysDTO();
         List<EmployerDTo> employers = employerService.getALLEmployerDTO();
         List<MachineDTO> machines = machineService.getALlMachineDTO();
@@ -345,18 +346,26 @@ private final VacationService publicHolidaysService;
                     }
 
                     // Mise à jour des dates planifiées
-                    LocalDateTime startDate = startPlanning.plusHours(startDates[i].getValue());
+                    LocalDateTime tentativeStart = startPlanning.plusHours(startDates[i].getValue());
                     int duree = activity.getDuration();
-                    LocalDateTime endDate = PlanningUtils.calculerDateFinEffective(startDate, duree, holidays);
 
-                    activity.setPlannedStartDate(startDate);
-                    activity.setPlannedEndDate(endDate);
-                    // Affichage des dates de début et de fin
-                    System.out.println("[Start: " + startDates[i].getValue() + ", End: " + endDates[i].getValue() + "]");
+                     // Appel à la méthode corrigée pour obtenir les dates effectives
+                    DatePlanningResult resultDates = PlanningUtils.calculerDateDebutEtFinEffective(tentativeStart, duree, holidays, workTime);
 
-                    // Ajout de l'activité aux résultats
+                                // Mise à jour de l'activité avec les dates valides
+                    activity.setPlannedStartDate(resultDates.getStartDate());
+                    activity.setPlannedEndDate(resultDates.getEndDate());
+
+                        // Affichage des dates de début et de fin effectives
+                    System.out.println("[Start: " + resultDates.getStartDate() + ", End: " + resultDates.getEndDate() + "]");
+
+// Ajout de l'activité aux résultats
                     results.add(activity);
                     activityService.updateActivity(activity);
+
+
+
+
                     System.out.println("["+activity.getName()+" : " +activity.getPlannedStartDate() + ", " + activity.getPlannedEndDate() + "]");
                 }
 

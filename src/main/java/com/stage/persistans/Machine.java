@@ -36,7 +36,7 @@ public class Machine {
     private Boolean status  =true;
 
 @ManyToMany
-    private List<CapabilityMachine> CapabilityMachines;
+    private List<CapabilityMachine> capabilityMachines;
 
     @Column(updatable = false)
     private LocalDateTime createdDate;
