@@ -71,6 +71,7 @@ public Employer findEmployerByPhone(String phone) {
         return null;
 }
     public Employer save(Employer employer) {
+        employer.setMatricule(generateNextMatricule());
 
         WorkTime workTime= workTimeService.getWorkTimeById(1L);
         employer.setWorkTime(workTime);
@@ -106,5 +107,14 @@ public Employer updateStatus(Employer employer) {
         }
         return null;
 }
+
+    public Integer generateNextMatricule() {
+        Integer maxMatricule = employerRepository.findMaxMatricule();
+        if (maxMatricule == null) {
+            return 100; // Première insertion
+        }
+        return maxMatricule + 1;
+    }
+
 
 }

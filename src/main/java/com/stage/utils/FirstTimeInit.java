@@ -2,13 +2,11 @@ package com.stage.utils;
 
 import com.stage.persistans.*;
 import com.stage.persistans.DailyWorkTime;
-import com.stage.persistans.enums.DependencyType;
-import com.stage.persistans.enums.MachineType;
-import com.stage.persistans.enums.ActivityType;
-import com.stage.persistans.enums.Statut;
+import com.stage.persistans.enums.*;
 import com.stage.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
@@ -29,9 +27,22 @@ public class FirstTimeInit implements CommandLineRunner {
     private final WorkTimeRepository workTimeRepository;
     private final DailyWorkTimeRepository dailyWorkTimeRepository;
 
+    private final UserRepository userRepository;
+    private final PasswordEncoder  passwordEncoder;
     @Override
     public void run(String... args) throws Exception {
             createModelActivities();
+
+
+            if(userRepository.count() == 0) {
+
+
+            User user =   new User();
+            user.setEmail("kawthar@test.tn");
+            user.setPassword(passwordEncoder.encode("password"));
+            user.setIsEnabled(true);
+            user.setRole(Role.ADMIN);
+            userRepository.save(user);}
     }
 
     private void createModelActivities() {
@@ -115,6 +126,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer1.setSkills(List.of(s1));
                 employer1.setWorkTime(workTime);
                 employer1.setCapabilityMachine(List.of(c1));
+                employer1.setMatricule(100);
 
                 employer2 = new Employer();
                 employer2.setFirstName("employer2");
@@ -125,7 +137,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer2.setSkills(List.of(s2,s1));
                 employer2.setWorkTime(workTime);
                 employer2.setCapabilityMachine(List.of(c2,c1));
-
+                employer2.setMatricule(101);
 
                 employer3 = new Employer();
                 employer3.setFirstName("employer3");
@@ -136,7 +148,9 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer3.setSkills(List.of(s2));
                 employer3.setWorkTime(workTime);
                 employer3.setCapabilityMachine(List.of(c2));
+                employer3.setMatricule(102);
 
+                
                 employer4 = new Employer();
                 employer4.setFirstName("employer4");
                 employer4.setLastName("employer4");
@@ -146,7 +160,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer4.setSkills(List.of(s2,s1));
                 employer4.setWorkTime(workTime);
                 employer4.setCapabilityMachine(List.of(c2,c1));
-
+                employer4.setMatricule(103);
 
                 employer5= new Employer();
                 employer5.setFirstName("employer5");
@@ -156,6 +170,8 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer5.setGrade("Junior");
                 employer5.setSkills(List.of(s3));
                 employer5.setWorkTime(workTime);
+                employer5.setMatricule(104);
+
                 employerRepository.save(employer1);
                 employerRepository.save(employer2);
                 employerRepository.save(employer3);

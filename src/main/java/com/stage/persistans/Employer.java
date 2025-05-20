@@ -1,5 +1,6 @@
 package com.stage.persistans;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
@@ -27,6 +28,9 @@ public class Employer {
     private String firstName;
     @NonNull
     private String lastName;
+    @Column(unique = true, updatable = false)
+    private int matricule;
+
     @Column(unique = true, nullable = false)
     @NonNull
 
@@ -47,6 +51,7 @@ public class Employer {
     private Boolean status  =true;
 
     @ManyToOne
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private WorkTime workTime;
 
     @Column(updatable = false)
@@ -68,6 +73,9 @@ public class Employer {
     protected void onUpdate() {
         updatedDate = LocalDateTime.now();
     }
+
+
+
 
 
 }
