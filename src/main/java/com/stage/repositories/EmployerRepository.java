@@ -12,6 +12,8 @@ import java.util.Optional;
 @Repository
 public interface EmployerRepository extends JpaRepository<Employer, Long> {
     Optional<Employer> findByPhone(String phone);
-    @Query("SELECT MAX(e.matricule) FROM Employer e")
-    Integer findMaxMatricule();
+    @Query("SELECT MAX(CAST(SUBSTRING(e.matricule, 5) AS int)) FROM Employer e")
+    Integer findMaxNumericPartOfMatricule();
+
+    Optional<Employer> findByEmail(String email);
 }

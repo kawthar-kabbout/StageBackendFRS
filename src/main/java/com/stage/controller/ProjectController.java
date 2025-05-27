@@ -26,7 +26,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/projects")
-
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
@@ -47,7 +46,7 @@ public class ProjectController {
         List<Project> projects = projectService.getALlProject();
         List<Project> projectsPlanned = new ArrayList<>();
         for (Project project : projects) {
-            if (project.getIsPlanned()==0){
+            if (project.getIsPlanned()==true){
                 projectsPlanned.add(project);
             }
         }
@@ -179,7 +178,7 @@ List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId(
         }
 
         for (Project p: projects){
-            p.setIsPlanned(0);
+            p.setIsPlanned(true);
             projectService.update(p);
 
         }

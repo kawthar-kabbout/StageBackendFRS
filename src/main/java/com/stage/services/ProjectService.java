@@ -107,7 +107,7 @@ public class ProjectService {
             if (project.getArchived()==0 &&
             project.getStatut()!= Statut.Finish &&
                     project.getStatut()!= Statut.Cancel
-            && project.getIsPlanned()==0)
+            && project.getIsPlanned()==true)
             projetDTOs.add(getProjetDTOPalnification(project));
 
         }

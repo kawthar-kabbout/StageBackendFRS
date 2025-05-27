@@ -21,6 +21,7 @@ public class Project {
     private String name;
     private Long projectTemplateId;
     private Statut statut;
+    private boolean isPlanned = false ;
 
     public Project(@NonNull String name) {
         this.name = name;
@@ -34,7 +35,9 @@ public class Project {
 
     @Column(nullable = false)
     private int template  = 0;
-    private int isPlanned =1;
+
+
+
 
     @Column(nullable = false)
     private int archived = 0;
@@ -51,4 +54,11 @@ public class Project {
         updatedDate = LocalDateTime.now();
     }
 
+    public boolean getIsPlanned() {
+        return isPlanned;
+    }
+
+    public void setIsPlanned(boolean planned) {
+        isPlanned = planned;
+    }
 }

@@ -36,6 +36,15 @@ private final WorkTimeService workTimeService;
         return employerDTo;
     }
 
+    public Employer findEmployerByEmail(String email) {
+        Optional<Employer> employer =employerRepository.findByEmail(email);
+        if (employer.isPresent()) {
+            return employer.get();
+        }
+        return null;
+    }
+
+
 
 
 
@@ -108,12 +117,12 @@ public Employer updateStatus(Employer employer) {
         return null;
 }
 
-    public Integer generateNextMatricule() {
-        Integer maxMatricule = employerRepository.findMaxMatricule();
+    public String generateNextMatricule() {
+        Integer maxMatricule = employerRepository.findMaxNumericPartOfMatricule();
         if (maxMatricule == null) {
-            return 100; // Première insertion
+            return "EMP-1020"; // Première insertion
         }
-        return maxMatricule + 1;
+        return "EMP-" + (maxMatricule + 1);
     }
 
 

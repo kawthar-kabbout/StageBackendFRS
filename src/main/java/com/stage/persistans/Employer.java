@@ -29,7 +29,7 @@ public class Employer {
     @NonNull
     private String lastName;
     @Column(unique = true, updatable = false)
-    private int matricule;
+    private String  matricule;
 
     @Column(unique = true, nullable = false)
     @NonNull
@@ -38,6 +38,11 @@ public class Employer {
     @NonNull
     @Column(nullable = false)
     private String address;
+
+    @Column(unique = true, updatable = false)
+    private String email;
+
+
     @NonNull
     @ManyToMany
     private List<Skill>skills;

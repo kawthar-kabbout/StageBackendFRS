@@ -39,7 +39,7 @@ public class FirstTimeInit implements CommandLineRunner {
 
             User user =   new User();
             user.setEmail("kawthar@test.tn");
-            user.setPassword(passwordEncoder.encode("password"));
+            user.setPassword(passwordEncoder.encode("1234"));
             user.setIsEnabled(true);
             user.setRole(Role.ADMIN);
             userRepository.save(user);}
@@ -84,29 +84,43 @@ public class FirstTimeInit implements CommandLineRunner {
 // Étape 3 : Sauvegarder WorkTime
         workTime = workTimeRepository.save(workTime);
 
-        Skill s1 = null;
-        Skill s2 = null;
-        Skill s3 = null;
+        Skill decoupe = null;
+        Skill usinage = null;
+        Skill assemblage = null;
+        Skill finition = null;
+        Skill contrôle = null;
+        Skill pose = null;
+        Skill s7 = null;
         CapabilityMachine c1 = null;
         CapabilityMachine c2 = null;
+        CapabilityMachine c3 = null;
 
         // Création des compétences (skills) si elles n'existent pas déjà
         if (skillRepository.count() == 0) {
-            s1 = new Skill("skill 1", "description");
-            s2 = new Skill("skill 2", "description");
-            s3 = new Skill("skill 3", "description");
-            skillRepository.save(s1);
-            skillRepository.save(s2);
-            skillRepository.save(s3);
+            decoupe = new Skill("Découpe des Panneaux", "Découpe des Panneaux du Bois");
+            usinage = new Skill("Usinage", "Usinage (Perçage, Rainurage, etc.)");
+            assemblage = new Skill("Assemblage", "Assemblage des caissons");
+            finition = new Skill("Finition", "Finition");
+            contrôle = new Skill("Contrôle", "Contrôle Qualité des Produits Finis");
+            pose = new Skill("Installation", "Installation");
 
+
+            skillRepository.save(decoupe);
+            skillRepository.save(usinage);
+            skillRepository.save(assemblage);
+            skillRepository.save(finition);
+            skillRepository.save(contrôle);
+            skillRepository.save(pose);
             // Création des capacités machines si elles n'existent pas déjà
             if (capabilityMachineRepository.count() == 0) {
-                c1 = new CapabilityMachine("capability machine1","description");
-                c2 = new CapabilityMachine("capability machine2","description");
+                c1 = new CapabilityMachine("Découpe des Panneaux","Découpe des Panneaux");
+                c2 = new CapabilityMachine("Rainures","Rainures");
+                c3 = new CapabilityMachine("Plaqueuse de chant","Plaqueuse de chant");
 
 
                 capabilityMachineRepository.save(c1);
                 capabilityMachineRepository.save(c2);
+                capabilityMachineRepository.save(c3);
             }
 
             // Création des employeurs (employers)
@@ -116,61 +130,66 @@ public class FirstTimeInit implements CommandLineRunner {
             Employer employer4 = null;
             Employer employer5 = null;
 
-            if (employerRepository.count() == 0 && s1 != null && s2 != null) {
+            if (employerRepository.count() == 0 && decoupe != null && usinage != null) {
                 employer1 = new Employer();
-                employer1.setFirstName("employer1");
-                employer1.setLastName("employer1");
-                employer1.setPhone("1234555567890");
+                employer1.setFirstName("Kabbout");
+                employer1.setLastName("Ayman");
+                employer1.setPhone("27049997");
                 employer1.setAddress("123 Main St");
-                employer1.setGrade("Senior");
-                employer1.setSkills(List.of(s1));
+                employer1.setGrade("Junior");
+                employer1.setSkills(List.of(decoupe, usinage,contrôle,finition));
                 employer1.setWorkTime(workTime);
                 employer1.setCapabilityMachine(List.of(c1));
-                employer1.setMatricule(100);
+                employer1.setMatricule("EMP-1020");
+                employer1.setEmail("employer1@test.tn");
 
                 employer2 = new Employer();
-                employer2.setFirstName("employer2");
-                employer2.setLastName("employer2");
-                employer2.setPhone("09876543244441");
+                employer2.setFirstName("Trabelsi");
+                employer2.setLastName("Mohamed Ali");
+                employer2.setPhone("23416137");
                 employer2.setAddress("456 Elm St");
                 employer2.setGrade("Junior");
-                employer2.setSkills(List.of(s2,s1));
+                employer2.setSkills(List.of(decoupe, usinage,contrôle));
                 employer2.setWorkTime(workTime);
                 employer2.setCapabilityMachine(List.of(c2,c1));
-                employer2.setMatricule(101);
+                employer2.setMatricule("EMP-1021");
+                employer2.setEmail("employer2@test.tn");
 
                 employer3 = new Employer();
-                employer3.setFirstName("employer3");
-                employer3.setLastName("employer3");
-                employer3.setPhone("0987654321");
+                employer3.setFirstName("Kabbout");
+                employer3.setLastName("Mohamed");
+                employer3.setPhone("96624391");
                 employer3.setAddress("456 Elm St");
                 employer3.setGrade("Junior");
-                employer3.setSkills(List.of(s2));
+                employer3.setSkills(List.of(usinage,contrôle,pose));
                 employer3.setWorkTime(workTime);
-                employer3.setCapabilityMachine(List.of(c2));
-                employer3.setMatricule(102);
+
+                employer3.setMatricule("EMP-1022");
+                employer3.setEmail("employer3@test.tn");
 
                 
                 employer4 = new Employer();
-                employer4.setFirstName("employer4");
-                employer4.setLastName("employer4");
-                employer4.setPhone("0987654326584981");
+                employer4.setFirstName("Chouchen");
+                employer4.setLastName("Samih");
+                employer4.setPhone("23558778");
                 employer4.setAddress("456 Elm St");
                 employer4.setGrade("Junior");
-                employer4.setSkills(List.of(s2,s1));
+                employer4.setSkills(List.of(pose));
                 employer4.setWorkTime(workTime);
-                employer4.setCapabilityMachine(List.of(c2,c1));
-                employer4.setMatricule(103);
+
+                employer4.setMatricule("EMP-1023");
+                employer4.setEmail("employer4@test.tn");
 
                 employer5= new Employer();
-                employer5.setFirstName("employer5");
-                employer5.setLastName("employer5");
-                employer5.setPhone("098765432658");
+                employer5.setFirstName("Hmida");
+                employer5.setLastName("Jihed");
+                employer5.setPhone("21369258");
                 employer5.setAddress("456 Elm St");
                 employer5.setGrade("Junior");
-                employer5.setSkills(List.of(s3));
+                employer5.setSkills(List.of(pose));
                 employer5.setWorkTime(workTime);
-                employer5.setMatricule(104);
+                employer5.setMatricule("EMP-1024");
+                employer5.setEmail("employer5@test.tn");
 
                 employerRepository.save(employer1);
                 employerRepository.save(employer2);
@@ -184,21 +203,21 @@ public class FirstTimeInit implements CommandLineRunner {
             Machine machine2 = null;
             Machine machine11 = null;
 
-            if (machineRepository.count() == 0 && s1 != null && s2 != null) {
+            if (machineRepository.count() == 0 && decoupe != null && pose != null) {
                 machine1 = new Machine();
                 machine1.setSerialNumber("MACHINE-001");
-                machine1.setName("Machine 1");
+                machine1.setName("sia panneau");
                 machine1.setMachineType(MachineType.Automatique);
                 machine1.setMarque("Brand X");
                 machine1.setStatus(true);
-                machine1.setCapabilityMachines(List.of(c1));
+                machine1.setCapabilityMachines(List.of(c1,c2));
 
 
                 machine11 = new Machine();
                 machine11.setSerialNumber("MACHINE-001555");
-                machine11.setName("Machine 11");
+                machine11.setName("Plaqueuse de chant automatique");
                 machine11.setMachineType(MachineType.Automatique);
-                machine11.setMarque("Brand X");
+                machine11.setMarque("Brand Y");
                 machine11.setStatus(true);
                 machine11.setCapabilityMachines(List.of(c1));
 
@@ -208,7 +227,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 machine2.setMachineType(MachineType.Automatique);
                 machine2.setMarque("Brand Y");
                 machine2.setStatus(false);
-                machine2.setCapabilityMachines(List.of(c2));
+                machine2.setCapabilityMachines(List.of(c3));
 
                 machineRepository.save(machine1);
                 machineRepository.save(machine2);
@@ -221,8 +240,9 @@ public class FirstTimeInit implements CommandLineRunner {
         Project p2 = null;
 
         if (projectRepository.count() == 0) {
-            p1 = new Project("Cuisine");
-            p2 = new Project("Dressing");
+            p1 = new Project("Dressing");
+            p2 = new Project("Meubles cuisine");
+
             projectRepository.save(p1);
             projectRepository.save(p2);
         }
@@ -240,25 +260,34 @@ public class FirstTimeInit implements CommandLineRunner {
         Activity activity10 = null;
         Activity activity11 = null;
         Activity activity12 = null;
+        Activity activity13 = null;
+        Activity activity14 = null;
+
 
         if (modeleActivityRepository.count() == 0) {
-            if (p1 != null && p2 != null && s1 != null && s2 != null) {
+            if (p1 != null && p2 != null && decoupe != null && pose != null) {
 
-                activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, c1, s1,90,2);
+                activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, c1, decoupe,90,2);
 
-                activity8 =new Activity("Production", ActivityType.INTERNE,p2,0);
-                activity2 = new Activity( "Découpe des Panneaux et Pièces", Statut.Pending,  ActivityType.INTERNE, activity8, p2, s1, c1, 2, 2  );
-                activity3 = new Activity( "Usinage", Statut.Pending,  ActivityType.INTERNE, activity8, p2, s2,c2, 5, 2   );
-                activity4 = new Activity( "Assemblage des Composants", Statut.Pending,  ActivityType.INTERNE, activity8, p2, s2,null, 3, 1   );
-                activity5 = new Activity( "Penturation", Statut.Pending,  ActivityType.SOUS_TRAITANCE, activity8, p2, null,null, 48, 0 );
-                activity6 =new Activity( "Finition", Statut.Pending,  ActivityType.INTERNE, activity8, p2, s2,null, 2, 2   );
-                activity7 = new Activity( "Contrôle Qualité des Produits Finis", Statut.Pending,  ActivityType.INTERNE, activity8, p2, s2,null, 1, 2   );
+                activity8 =new Activity("Production", null,ActivityType.INTERNE,p2,0);
 
-                activity9 =new Activity("Installation", ActivityType.EXTERNE,p2,0);
+                activity2 = new Activity( "Découpe des Panneaux",Statut.Pending,  ActivityType.INTERNE, activity8, p2, decoupe, c1, 2, 2  );
 
-                activity10 = new Activity( "Préparation du Site d'Installation", Statut.Pending, ActivityType.EXTERNE,  activity9, p2, s3, null, 3, 1 );
-                activity11= new Activity( "Montage sur Place", Statut.Pending, ActivityType.EXTERNE,  activity9, p2, s3,null, 3, 1   );
-                activity12 = new Activity( "Ajustements et Vérifications Finales", Statut.Pending, ActivityType.EXTERNE,  activity9, p2, s3,null, 1, 1  );
+                activity3 =new Activity("Usinage", activity8,ActivityType.INTERNE,p2,0);
+
+                activity4 = new Activity( "Perçage", Statut.Pending,  ActivityType.INTERNE, activity3, p2, usinage,null, 1, 1   );
+                activity5 = new Activity( "Couvre chant", Statut.Pending,  ActivityType.INTERNE, activity3, p2, usinage,c2, 1, 1  );
+                activity6 = new Activity( "Rainurage", Statut.Pending,  ActivityType.INTERNE, activity3, p2, usinage,c2, 1, 1  );
+
+                activity7 = new Activity( "Assemblage des caissons", Statut.Pending,  ActivityType.INTERNE, activity8, p2, assemblage,null, 3, 2   );
+                activity9 = new Activity( "Application de peinture sur les façades", Statut.Pending,  ActivityType.SOUS_TRAITANCE, activity8, p2, null,null, 12, 0 );
+                activity10 =new Activity( "Finition", Statut.Pending,  ActivityType.INTERNE, activity8, p2, finition,null, 2, 2   );
+                activity11 = new Activity( "Contrôle", Statut.Pending,  ActivityType.INTERNE, activity8, p2, contrôle,null, 1, 2   );
+
+                activity12 =new Activity("Livraison",null, ActivityType.EXTERNE,p2,0);
+
+                activity13 = new Activity( "Pose d'élément haut", Statut.Pending, ActivityType.EXTERNE,  activity12, p2, pose, null, 3, 1 );
+                activity14= new Activity( "Pose d'élément bas", Statut.Pending, ActivityType.EXTERNE,  activity12, p2, pose,null, 3, 1   );
 
 
                 modeleActivityRepository.save(activity8);
@@ -273,6 +302,9 @@ public class FirstTimeInit implements CommandLineRunner {
                 modeleActivityRepository.save(activity10);
                 modeleActivityRepository.save(activity11);
                 modeleActivityRepository.save(activity12);
+                modeleActivityRepository.save(activity13);
+                modeleActivityRepository.save(activity14);
+
 
             }
         }
@@ -280,15 +312,12 @@ public class FirstTimeInit implements CommandLineRunner {
 
        if (activity1 != null && activity2 != null && activity3 != null && activity4 != null && activity5 != null) {
 
-            if (activity3.getId() != null && activity2.getId() != null) {
-                DependanceActivity d1 = new DependanceActivity(activity3, activity2, DependencyType.FS,2);
+            if (activity4.getId() != null && activity2.getId() != null) {
+                DependanceActivity d1 = new DependanceActivity(activity4, activity2, DependencyType.FS,2);
                 dependanceActivityRepository.save(d1);
             }
 
-            if (activity3.getId() != null && activity4.getId() != null) {
-                DependanceActivity d2 = new DependanceActivity(activity4,activity3, DependencyType.FS,1);
-                dependanceActivityRepository.save(d2);
-            }
+
 
             if (activity4.getId() != null && activity5.getId() != null) {
                 DependanceActivity d3 = new DependanceActivity(activity5,activity4, DependencyType.SS,1);
@@ -301,20 +330,34 @@ public class FirstTimeInit implements CommandLineRunner {
            }
 
            if (activity7.getId() != null && activity6.getId() != null) {
-               DependanceActivity d4 = new DependanceActivity(activity7,activity6, DependencyType.SS,1);
+               DependanceActivity d4 = new DependanceActivity(activity7,activity6, DependencyType.FS,1);
                dependanceActivityRepository.save(d4);
            }
 
-           if (activity10.getId() != null && activity7.getId() != null) {
-               DependanceActivity d5 = new DependanceActivity(activity10,activity7, DependencyType.FS,1);
+           if (activity9.getId() != null && activity7.getId() != null) {
+               DependanceActivity d5 = new DependanceActivity(activity9,activity7, DependencyType.FS,1);
                dependanceActivityRepository.save(d5);
            }
-           if (activity11.getId() != null && activity10.getId() != null) {
+
+           if (activity10.getId() != null && activity9.getId() != null) {
+               DependanceActivity d5 = new DependanceActivity(activity10,activity9, DependencyType.FS,1);
+               dependanceActivityRepository.save(d5);
+           }
+
+
+           if (activity10.getId() != null && activity11.getId() != null) {
                DependanceActivity d6 = new DependanceActivity(activity11,activity10, DependencyType.FS,1);
                dependanceActivityRepository.save(d6);
            }
-           if (activity12.getId() != null && activity11.getId() != null) {
-               DependanceActivity d7 = new DependanceActivity(activity12,activity11, DependencyType.FS,1);
+
+           if (activity13.getId() != null && activity11.getId() != null) {
+               DependanceActivity d7 = new DependanceActivity(activity13,activity11, DependencyType.FS,2);
+               dependanceActivityRepository.save(d7);
+           }
+
+
+           if (activity14.getId() != null && activity13.getId() != null) {
+               DependanceActivity d7 = new DependanceActivity(activity14,activity13, DependencyType.FS,24);
                dependanceActivityRepository.save(d7);
            }
         }

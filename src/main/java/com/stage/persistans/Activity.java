@@ -105,8 +105,9 @@ public class Activity {
         this.duration = duration;
     }
 
-    public Activity(@NonNull String name, ActivityType typeActivity, @NonNull Project project ,Integer duration) {
+    public Activity(@NonNull String name,Activity parentActivity, ActivityType typeActivity, @NonNull Project project ,Integer duration) {
         this.name = name;
+        this.parentActivity = parentActivity;
         this.typeActivity = typeActivity;
         this.project = project;
         this.duration = duration;

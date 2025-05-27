@@ -345,21 +345,15 @@ private final VacationService publicHolidaysService;
                         System.out.print("Pas d'employeurs ni de machines attribués, ");
                     }
 
+
                     // Mise à jour des dates planifiées
-                    LocalDateTime tentativeStart = startPlanning.plusHours(startDates[i].getValue());
-                    int duree = activity.getDuration();
+                    activity.setPlannedStartDate(startPlanning.plusHours(startDates[i].getValue()));
+                    activity.setPlannedEndDate(startPlanning.plusHours(endDates[i].getValue()));
 
-                     // Appel à la méthode corrigée pour obtenir les dates effectives
-                    DatePlanningResult resultDates = PlanningUtils.calculerDateDebutEtFinEffective(tentativeStart, duree, holidays, workTime);
+                    // Affichage des dates de début et de fin
+                    System.out.println("[Start: " + startDates[i].getValue() + ", End: " + endDates[i].getValue() + "]");
 
-                                // Mise à jour de l'activité avec les dates valides
-                    activity.setPlannedStartDate(resultDates.getStartDate());
-                    activity.setPlannedEndDate(resultDates.getEndDate());
-
-                        // Affichage des dates de début et de fin effectives
-                    System.out.println("[Start: " + resultDates.getStartDate() + ", End: " + resultDates.getEndDate() + "]");
-
-// Ajout de l'activité aux résultats
+                    // Ajout de l'activité aux résultats
                     results.add(activity);
                     activityService.updateActivity(activity);
 
@@ -372,6 +366,9 @@ private final VacationService publicHolidaysService;
                 // Mise à jour de la meilleure durée totale
                 bestTotalDuration = totalDuration.getValue();
             }
+            ///  deps
+
+
 
             // Affichage de la durée totale d'exécution
             System.out.println("Durée totale d'exécution : " + totalDuration.getValue() + " heures");
@@ -380,6 +377,7 @@ private final VacationService publicHolidaysService;
         if (solutionCount == 0) {
             System.out.println("Aucune solution trouvée. Vérifiez les contraintes et les données.");
         }
+        //PlanningUtilsChoco.planifierAvecChoco(results, deps, holidays, workTime);
 
         return results;
     }

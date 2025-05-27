@@ -32,13 +32,18 @@ public class EmployerControoller {
     @PostMapping
     public ResponseEntity<?> createEmployer(@RequestBody Employer employer) {
         if (employerService.findEmployerByPhone(employer.getPhone()) != null) {
-            // Le téléphone existe déjà → conflit
+
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("message", "Un employeur avec ce numéro de téléphone existe déjà.");
             return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         }
 
-        // Si tout est ok → on sauvegarde
+        if (employerService.findEmployerByEmail(employer.getEmail()) != null) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Un employeur avec cet email existe déjà.");
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+        }
+
         Employer savedEmployer = employerService.save(employer);
         return new ResponseEntity<>(savedEmployer, HttpStatus.CREATED);
     }
