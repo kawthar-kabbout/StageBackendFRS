@@ -101,21 +101,15 @@ public Machine findBySerialNumber(String serialNumber) {
     public List<MachineType> getTypes() {
         return Arrays.asList(MachineType.values());
     }
-    public boolean changeMachineStatus(Long id , Machine machine) {
+    public Machine changeMachineStatus(Long id ) {
         if (machineRepository.findById(id).isPresent()) {
-            Machine m=machineRepository.findById(id).get();
-            if (machine.getStatus()){
-                m.setStatus(false);
-                machineRepository.save(m);
-                return true;
-            }else {
-                m.setStatus(true);
-                machineRepository.save(m);
-                return true;
-            }
+            Machine machine = machineRepository.findById(id).get();
+
+            machine.setStatus(!machine.getStatus());
+            machineRepository.save(machine);
+            return machine;
         }
-        else
-            return false;
+        return  null;
     }
 
 

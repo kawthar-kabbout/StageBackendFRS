@@ -2,6 +2,7 @@ package com.stage.services;
 
 import com.stage.dto.ActiviteFrontDTO;
 import com.stage.dto.ProjetDTO;
+import com.stage.dto.ProjetTreeDTO;
 import com.stage.persistans.Project;
 import com.stage.persistans.enums.Statut;
 import com.stage.repositories.ProjectRepository;
@@ -57,7 +58,9 @@ public class ProjectService {
             newProject = new Project();
             newProject.setName(newName);
             newProject.setProjectTemplateId(projectTemplate.getId());
-            newProject.setTemplate(1);
+            newProject.setTemplate(false);
+
+
             if (projectRepository.save(newProject) != null) {
                 activityService.cloneActivityProjectRootTree(projectTemplate, projectRepository.save(newProject),activitesFrontDTO);
             }
@@ -88,6 +91,21 @@ public class ProjectService {
 
     }
 
+
+
+
+
+    public ProjetTreeDTO getProjetTreeDTOPalnification(Project project) {
+        ProjetTreeDTO projetTreeDTO = new ProjetTreeDTO();
+        projetTreeDTO.setId(project.getId());
+        projetTreeDTO.setName(project.getName());
+        projetTreeDTO.setProjectTemplateId(project.getProjectTemplateId());
+        projetTreeDTO.setActivites(activityService.getProjectWBSStructure(project.getId()));
+        return projetTreeDTO;
+
+    }
+
+
     public Boolean deleteProject(Project project) {
         Optional<Project> projectOptional = projectRepository.findById(project.getId());
         if (projectOptional.isPresent()) {
@@ -100,18 +118,18 @@ public class ProjectService {
     }
 
 
-    public List<ProjetDTO>getAllProjectsNotFinishedAndIsPlanned() {
+    public List<ProjetTreeDTO>getAllProjectsTreeNotFinishedAndIsPlanned() {
         List<Project>projects = projectRepository.findAll();
-        List<ProjetDTO> projetDTOs = new ArrayList<>();
+        List<ProjetTreeDTO> projetTreeDTOs = new ArrayList<>();
         for (Project project : projects) {
             if (project.getArchived()==0 &&
             project.getStatut()!= Statut.Finish &&
                     project.getStatut()!= Statut.Cancel
             && project.getIsPlanned()==true)
-            projetDTOs.add(getProjetDTOPalnification(project));
+                projetTreeDTOs.add(getProjetTreeDTOPalnification(project));
 
         }
-        return projetDTOs;
+        return projetTreeDTOs;
     }
 
 }

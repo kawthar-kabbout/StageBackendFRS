@@ -62,6 +62,11 @@ public class Activity {
     private LocalDateTime effectiveEndDate;
     private Integer duration;
     private int employersNumber;
+    @Column(nullable = false)
+    private boolean isTemplate  = false;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<Vacation> vacations = new ArrayList<>();
 
     @Column(updatable = false)
     private LocalDateTime createdDate;
@@ -71,6 +76,14 @@ public class Activity {
     @Column(nullable = false)
     private int archived = 0;
 
+
+    public boolean isATemplate() {
+        return isTemplate;
+    }
+
+    public void setATemplate(boolean ATemplate) {
+        isTemplate = ATemplate;
+    }
 
     @PrePersist
     protected void onCreate() {

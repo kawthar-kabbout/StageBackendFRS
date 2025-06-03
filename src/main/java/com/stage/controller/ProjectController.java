@@ -3,14 +3,12 @@ package com.stage.controller;
 import com.stage.dto.ActiviteFrontDTO;
 import com.stage.dto.ActivityDTO;
 import com.stage.dto.ProjetDTO;
+import com.stage.dto.ProjetTreeDTO;
 import com.stage.persistans.Activity;
 import com.stage.persistans.DependanceActivity;
 import com.stage.persistans.Project;
 import com.stage.repositories.ProjectRepository;
-import com.stage.services.ActivityService;
-import com.stage.services.ChocosolverService;
-import com.stage.services.DependanceActivityService;
-import com.stage.services.ProjectService;
+import com.stage.services.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,6 +30,7 @@ public class ProjectController {
     private final ActivityService activityService;
     private final DependanceActivityService dependanceActivityService;
     private final ChocosolverService chocosolverService;
+    private final EmployeeMachineValidator employeeMachineValidator;
 
     @GetMapping
     public ResponseEntity<List<Project>> getProjects() {
@@ -148,45 +147,48 @@ List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId(
     }
 
     @PostMapping("/solve/projects/{startPlanning}")
-    public ResponseEntity<List<Activity>> solveNewProject(
-            @PathVariable Long startPlanning ,
+    public ResponseEntity<?> solveNewProject(
+            @PathVariable Long startPlanning,
             @RequestBody List<Project> projects) {
 
-
-        System.out.println("");
-        System.out.println("");
-        System.out.println("LocalDateTime: " + startPlanning);
-      Long   startPlanning2=startPlanning*1000;
-        LocalDateTime localDateTimePlannig  = Instant.ofEpochMilli(startPlanning2)
+        Long startPlanning2 = startPlanning * 1000;
+        LocalDateTime localDateTimePlannig = Instant.ofEpochMilli(startPlanning2)
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
-
-        System.out.println("LocalDateTime: " + localDateTimePlannig);
 
         // Validate that the projects exist
         if (!projectService.existingProjects(projects)) {
             return ResponseEntity.notFound().build();
         }
 
+        // Validate employee and machine requirements
+        List<String> validationErrors = employeeMachineValidator.employeeMachineValidator(projects);
+
+        // If there are validation errors, return them
+        if (!validationErrors.isEmpty()) {
+            return ResponseEntity.badRequest().body(validationErrors);
+        }
 
         // Solve the projects using the Choco solver
-        List<Activity> result = chocosolverService.chocosolver(projects,localDateTimePlannig);
+        List<Activity> result = chocosolverService.chocosolver(projects, localDateTimePlannig);
 
         // Check if the result is valid
         if (result == null || result.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        for (Project p: projects){
+        // Mark projects as planned
+        for (Project p : projects) {
             p.setIsPlanned(true);
             projectService.update(p);
-
         }
 
+        // Return the solved activities
         return ResponseEntity.ok(result);
     }
 
-        @GetMapping("/project/planning/{id}")
+
+    @GetMapping("/project/planning/{id}")
     public ResponseEntity<ProjetDTO> getProjectPlanning(@PathVariable Long id) {
         Optional<Project> project = projectService.getProjectById(id);
         if (project.isPresent()) {
@@ -213,10 +215,10 @@ List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId(
         }
     }
 
-    @GetMapping("/getAllProjects/gantt")
-    private ResponseEntity<List<ProjetDTO>> getallProjectsNotFinishedAndIsPlanned() {
+    @GetMapping("/getAllProjectsTree/gantt")
+    private ResponseEntity<List<ProjetTreeDTO>> getallProjectsNotFinishedAndIsPlanned() {
 
-        List<ProjetDTO> res = this.projectService.getAllProjectsNotFinishedAndIsPlanned();
+        List<ProjetTreeDTO> res = this.projectService.getAllProjectsTreeNotFinishedAndIsPlanned();
 
         return ResponseEntity.ok(res);
     }

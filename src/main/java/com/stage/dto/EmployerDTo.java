@@ -20,7 +20,7 @@ public class EmployerDTo {
     private List<Activity> activitiesNotFinish;
     private List<Skill> skills= new ArrayList<>();
     private List<CapabilityMachine> capabilityMachine = new ArrayList<>();
-
+    private String  matricule;
 
     public EmployerDTo(Long id, String firstName, String lastName, List<Skill> skills, List<CapabilityMachine> capabilityMachine) {
         this.id = id;

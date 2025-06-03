@@ -332,6 +332,7 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject,
                 .machine(null)
                 .employees(null)
                 .employersNumber(dto.getEmployersNumber())
+                .isTemplate(true)
                 .build();
 
         newActivity = createActivity(newActivity);

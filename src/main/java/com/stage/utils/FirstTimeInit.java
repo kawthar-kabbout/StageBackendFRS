@@ -90,12 +90,15 @@ public class FirstTimeInit implements CommandLineRunner {
         Skill finition = null;
         Skill contrôle = null;
         Skill pose = null;
-        Skill s7 = null;
+        Skill skill1 = null;
+        Skill skill2 = null;
+
         CapabilityMachine c1 = null;
         CapabilityMachine c2 = null;
         CapabilityMachine c3 = null;
+        CapabilityMachine c4 = null;
 
-        // Création des compétences (skills) si elles n'existent pas déjà
+
         if (skillRepository.count() == 0) {
             decoupe = new Skill("Découpe des Panneaux", "Découpe des Panneaux du Bois");
             usinage = new Skill("Usinage", "Usinage (Perçage, Rainurage, etc.)");
@@ -103,7 +106,8 @@ public class FirstTimeInit implements CommandLineRunner {
             finition = new Skill("Finition", "Finition");
             contrôle = new Skill("Contrôle", "Contrôle Qualité des Produits Finis");
             pose = new Skill("Installation", "Installation");
-
+            skill1 = new Skill("Skill 1", "Skill 1");
+            skill2 = new Skill("Skill 2", "Skill 2");
 
             skillRepository.save(decoupe);
             skillRepository.save(usinage);
@@ -111,16 +115,20 @@ public class FirstTimeInit implements CommandLineRunner {
             skillRepository.save(finition);
             skillRepository.save(contrôle);
             skillRepository.save(pose);
+            skillRepository.save(skill1);
+            skillRepository.save(skill2);
             // Création des capacités machines si elles n'existent pas déjà
             if (capabilityMachineRepository.count() == 0) {
                 c1 = new CapabilityMachine("Découpe des Panneaux","Découpe des Panneaux");
                 c2 = new CapabilityMachine("Rainures","Rainures");
                 c3 = new CapabilityMachine("Plaqueuse de chant","Plaqueuse de chant");
+                c4  =new CapabilityMachine("CapabilityMachine1","CapabilityMachine1");
 
 
                 capabilityMachineRepository.save(c1);
                 capabilityMachineRepository.save(c2);
                 capabilityMachineRepository.save(c3);
+                capabilityMachineRepository.save(c4);
             }
 
             // Création des employeurs (employers)
@@ -137,21 +145,21 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer1.setPhone("27049997");
                 employer1.setAddress("123 Main St");
                 employer1.setGrade("Junior");
-                employer1.setSkills(List.of(decoupe, usinage,contrôle,finition));
+                employer1.setSkills(List.of(decoupe,usinage,assemblage));
                 employer1.setWorkTime(workTime);
-                employer1.setCapabilityMachine(List.of(c1));
+                employer1.setCapabilityMachine(List.of(c1,c3));
                 employer1.setMatricule("EMP-1020");
                 employer1.setEmail("employer1@test.tn");
 
                 employer2 = new Employer();
-                employer2.setFirstName("Trabelsi");
-                employer2.setLastName("Mohamed Ali");
+                employer2.setFirstName("Kabbout");
+                employer2.setLastName("Mohamed");
                 employer2.setPhone("23416137");
                 employer2.setAddress("456 Elm St");
                 employer2.setGrade("Junior");
-                employer2.setSkills(List.of(decoupe, usinage,contrôle));
+                employer2.setSkills(List.of(decoupe,usinage,assemblage,contrôle,finition));
                 employer2.setWorkTime(workTime);
-                employer2.setCapabilityMachine(List.of(c2,c1));
+                employer2.setCapabilityMachine(List.of(c2,c1,c3));
                 employer2.setMatricule("EMP-1021");
                 employer2.setEmail("employer2@test.tn");
 
@@ -161,7 +169,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer3.setPhone("96624391");
                 employer3.setAddress("456 Elm St");
                 employer3.setGrade("Junior");
-                employer3.setSkills(List.of(usinage,contrôle,pose));
+                employer3.setSkills(List.of(contrôle,finition));
                 employer3.setWorkTime(workTime);
 
                 employer3.setMatricule("EMP-1022");
@@ -169,8 +177,8 @@ public class FirstTimeInit implements CommandLineRunner {
 
                 
                 employer4 = new Employer();
-                employer4.setFirstName("Chouchen");
-                employer4.setLastName("Samih");
+                employer4.setFirstName("Hmida");
+                employer4.setLastName("Jihed");
                 employer4.setPhone("23558778");
                 employer4.setAddress("456 Elm St");
                 employer4.setGrade("Junior");
@@ -181,8 +189,8 @@ public class FirstTimeInit implements CommandLineRunner {
                 employer4.setEmail("employer4@test.tn");
 
                 employer5= new Employer();
-                employer5.setFirstName("Hmida");
-                employer5.setLastName("Jihed");
+                employer5.setFirstName("Chouchen");
+                employer5.setLastName("Samih");
                 employer5.setPhone("21369258");
                 employer5.setAddress("456 Elm St");
                 employer5.setGrade("Junior");
@@ -205,8 +213,9 @@ public class FirstTimeInit implements CommandLineRunner {
 
             if (machineRepository.count() == 0 && decoupe != null && pose != null) {
                 machine1 = new Machine();
+
                 machine1.setSerialNumber("MACHINE-001");
-                machine1.setName("sia panneau");
+                machine1.setName("Sia panneau");
                 machine1.setMachineType(MachineType.Automatique);
                 machine1.setMarque("Brand X");
                 machine1.setStatus(true);
@@ -219,15 +228,15 @@ public class FirstTimeInit implements CommandLineRunner {
                 machine11.setMachineType(MachineType.Automatique);
                 machine11.setMarque("Brand Y");
                 machine11.setStatus(true);
-                machine11.setCapabilityMachines(List.of(c1));
+                machine11.setCapabilityMachines(List.of(c3));
 
                 machine2 = new Machine();
                 machine2.setSerialNumber("MACHINE-002");
-                machine2.setName("Machine 2");
+                machine2.setName("CNC");
                 machine2.setMachineType(MachineType.Automatique);
                 machine2.setMarque("Brand Y");
-                machine2.setStatus(false);
-                machine2.setCapabilityMachines(List.of(c3));
+                machine2.setStatus(true);
+                machine2.setCapabilityMachines(List.of(c1,c2));
 
                 machineRepository.save(machine1);
                 machineRepository.save(machine2);
@@ -238,13 +247,22 @@ public class FirstTimeInit implements CommandLineRunner {
         // Création des projets (projects)
         Project p1 = null;
         Project p2 = null;
+        Project p3 = null;
+        Project p4 = null;
+        Project p5 = null;
 
         if (projectRepository.count() == 0) {
             p1 = new Project("Dressing");
             p2 = new Project("Meubles cuisine");
+            p3 = new Project("Buffet");
+            p4 = new Project("Table à manger");
+            p5 = new Project("Meuble TV");
 
             projectRepository.save(p1);
             projectRepository.save(p2);
+            projectRepository.save(p3);
+            projectRepository.save(p4);
+            projectRepository.save(p5);
         }
 
         // Création des activités (activities)
@@ -264,10 +282,21 @@ public class FirstTimeInit implements CommandLineRunner {
         Activity activity14 = null;
 
 
+
+        Activity activity15 = null;
+        Activity activity16 = null;
+        Activity activity17 = null;
+        Activity activity18 = null;
+        Activity activity19 = null;
+        Activity activity20 = null;
+
+
+
         if (modeleActivityRepository.count() == 0) {
             if (p1 != null && p2 != null && decoupe != null && pose != null) {
 
-                activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, c1, decoupe,90,2);
+                activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, c1, decoupe,4,2);
+                activity19 = new Activity("Activité 19", ActivityType.EXTERNE, p1, c3, usinage,3,2);
 
                 activity8 =new Activity("Production", null,ActivityType.INTERNE,p2,0);
 
@@ -276,7 +305,7 @@ public class FirstTimeInit implements CommandLineRunner {
                 activity3 =new Activity("Usinage", activity8,ActivityType.INTERNE,p2,0);
 
                 activity4 = new Activity( "Perçage", Statut.Pending,  ActivityType.INTERNE, activity3, p2, usinage,null, 1, 1   );
-                activity5 = new Activity( "Couvre chant", Statut.Pending,  ActivityType.INTERNE, activity3, p2, usinage,c2, 1, 1  );
+                activity5 = new Activity( "Couvre chant", Statut.Pending,  ActivityType.INTERNE, activity3, p2, usinage,c3, 1, 1  );
                 activity6 = new Activity( "Rainurage", Statut.Pending,  ActivityType.INTERNE, activity3, p2, usinage,c2, 1, 1  );
 
                 activity7 = new Activity( "Assemblage des caissons", Statut.Pending,  ActivityType.INTERNE, activity8, p2, assemblage,null, 3, 2   );
@@ -286,8 +315,20 @@ public class FirstTimeInit implements CommandLineRunner {
 
                 activity12 =new Activity("Livraison",null, ActivityType.EXTERNE,p2,0);
 
-                activity13 = new Activity( "Pose d'élément haut", Statut.Pending, ActivityType.EXTERNE,  activity12, p2, pose, null, 3, 1 );
-                activity14= new Activity( "Pose d'élément bas", Statut.Pending, ActivityType.EXTERNE,  activity12, p2, pose,null, 3, 1   );
+                activity13 = new Activity( "Pose d'élément haut", Statut.Pending, ActivityType.EXTERNE,  activity12, p2, pose, null, 3, 2 );
+                activity14= new Activity( "Pose d'élément bas", Statut.Pending, ActivityType.EXTERNE,  activity12, p2, pose,null, 3, 2   );
+
+
+
+                activity15= new Activity( "activity15", Statut.Pending, ActivityType.EXTERNE,  null, p3, skill1,c4, 3, 2   );
+
+                activity16= new Activity( "activity16", Statut.Pending, ActivityType.EXTERNE,  null, p3, skill2,c4, 3, 2   );
+                activity17= new Activity( "activity17", Statut.Pending, ActivityType.EXTERNE,  null, p3, skill1,c4, 3, 2   );
+                activity18= new Activity( "activity18", Statut.Pending, ActivityType.EXTERNE,  null, p3, skill2,c4, 3, 2   );
+
+                activity20= new Activity( "activity20", Statut.Pending, ActivityType.SOUS_TRAITANCE,  null, p3, null,null, 3, 2   );
+
+
 
 
                 modeleActivityRepository.save(activity8);
@@ -304,6 +345,12 @@ public class FirstTimeInit implements CommandLineRunner {
                 modeleActivityRepository.save(activity12);
                 modeleActivityRepository.save(activity13);
                 modeleActivityRepository.save(activity14);
+                modeleActivityRepository.save(activity15);
+                modeleActivityRepository.save(activity16);
+                modeleActivityRepository.save(activity17);
+                modeleActivityRepository.save(activity18);
+                modeleActivityRepository.save(activity19);
+                modeleActivityRepository.save(activity20);
 
 
             }
@@ -357,8 +404,13 @@ public class FirstTimeInit implements CommandLineRunner {
 
 
            if (activity14.getId() != null && activity13.getId() != null) {
-               DependanceActivity d7 = new DependanceActivity(activity14,activity13, DependencyType.FS,24);
-               dependanceActivityRepository.save(d7);
+               DependanceActivity d9 = new DependanceActivity(activity14,activity13, DependencyType.FS,24);
+               dependanceActivityRepository.save(d9);
+           }
+
+           if (activity19.getId() != null && activity1.getId() != null){
+               DependanceActivity d8 = new DependanceActivity(activity19,activity1, DependencyType.FS,2);
+               dependanceActivityRepository.save(d8);
            }
         }
     }

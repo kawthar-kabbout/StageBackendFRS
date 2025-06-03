@@ -34,7 +34,7 @@ public class Project {
     private LocalDateTime updatedDate;
 
     @Column(nullable = false)
-    private int template  = 0;
+    private boolean isTemplate  = true;
 
 
 

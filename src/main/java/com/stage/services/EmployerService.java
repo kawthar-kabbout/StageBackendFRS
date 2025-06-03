@@ -28,10 +28,12 @@ private final WorkTimeService workTimeService;
                 employer.getLastName(),
                employer.getSkills(),
                 employer.getCapabilityMachine()
+
         );
         if (activityService.getEmployerActivitiesNotFinish(employer) != null) {
             employerDTo.setActivitiesNotFinish(activityService.getEmployerActivitiesNotFinish(employer));
         }
+        employerDTo.setMatricule(employer.getMatricule());
 
         return employerDTo;
     }

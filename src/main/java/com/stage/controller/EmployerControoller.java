@@ -1,5 +1,6 @@
 package com.stage.controller;
 
+import com.stage.dto.EmployerDTo;
 import com.stage.persistans.Activity;
 import com.stage.persistans.Employer;
 import com.stage.services.ActivityService;
@@ -46,6 +47,12 @@ public class EmployerControoller {
 
         Employer savedEmployer = employerService.save(employer);
         return new ResponseEntity<>(savedEmployer, HttpStatus.CREATED);
+    }
+
+    @GetMapping("activities-not-finished")
+    public ResponseEntity<List<EmployerDTo>> getActivitiesNotFinished(){
+        List<EmployerDTo>employerDTos=employerService.getALLEmployerDTO();
+        return new ResponseEntity<>(employerDTos, HttpStatus.OK);
     }
 
 

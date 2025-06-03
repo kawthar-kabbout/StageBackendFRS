@@ -73,15 +73,14 @@ public class MachineController {
 
     }
     @PutMapping("/statusMachine/{id}")
-    public ResponseEntity<Machine> changeMachineStatus(@PathVariable Long id, @RequestBody Machine machine) {
-        if (machineService.findById(id).isPresent()) {
-            if (machineService.changeMachineStatus(id, machine)) {
+    public ResponseEntity<Machine> changeMachineStatus(@PathVariable Long id, @RequestBody Machine macshine) {
+
+            Machine machine = machineService.changeMachineStatus(id);
+
+            if(machine != null) {
                 return ResponseEntity.ok(machine);
-            } else {
+            }else {
                 return ResponseEntity.notFound().build();
-            }
-        } else {
-            return ResponseEntity.notFound().build();
         }
     }
     @DeleteMapping("/{id}")
