@@ -64,6 +64,7 @@ return employers;
         List<EmployerDTo> employerDTos = new ArrayList<>();
         for (Employer employer : employers) {
             EmployerDTo employerDTo = this.getEmployerDTo(employer);
+            if (employer.getStatus()==true)
             employerDTos.add(employerDTo);
         }
         return employerDTos;

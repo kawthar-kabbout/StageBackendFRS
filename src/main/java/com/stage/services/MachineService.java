@@ -76,6 +76,7 @@ public Machine findBySerialNumber(String serialNumber) {
         List<Machine> machines = machineRepository.findAll();
         for (Machine m : machines) {
             MachineDTO machineDTO = this.getMachineDTo(m);
+            if (m.getStatus()==true)
             machineDTOs.add(machineDTO);
         }
         return machineDTOs;

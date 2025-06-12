@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 @Service
 public class ChocosolverService {
+
     private final WorkTimeService workTimeService;
     private final EmployerService employerService;
     private final ActivityService activityService;
@@ -38,7 +39,7 @@ public class ChocosolverService {
     private static boolean estDansHoraireTravail(LocalTime time, DayOfWeek day, WorkTime workTime) {
         return workTime.getDailyWorkTimes().stream()
                 .filter(dwt -> dwt.getDay() == day)
-                .anyMatch(dwt ->
+                .anyMatch(dwt ->    /// /On vérifie si l’heure est dans le créneau matin ou après-midi
                         (!time.isBefore(dwt.getMorningStart()) && time.isBefore(dwt.getMorningEnd())) ||
                                 (!time.isBefore(dwt.getAfternoonStart()) && time.isBefore(dwt.getAfternoonEnd()))
                 );
@@ -47,7 +48,6 @@ public class ChocosolverService {
     public List<Activity> chocosolver(List<Project> projects, LocalDateTime startPlanning) {
         System.out.println("startPlanning: " + startPlanning);
 
-        // Récupération des données
         WorkTime workTime = workTimeService.getWorkTimeById(1L);
         List<PublicHolidaysDTO> holidays = publicHolidaysService.findAllPublicHolidaysDTO();
         List<EmployerDTo> employers = employerService.getALLEmployerDTO();
@@ -60,15 +60,13 @@ public class ChocosolverService {
             deps.addAll(dependanceActivityService.getDependenceActivitiesByProjectId(project.getId()));
         });
 
-        // Initialisation du modèle Choco Solver
         Model model = new Model("Activity Assignment Problem with Employers and Machines");
 
-        // Configuration de l'horizon temporel (90 jours)
-        int horizonHours = 24 * 90;
-        LocalDateTime baseDate = startPlanning.truncatedTo(ChronoUnit.HOURS);
+        int horizonHours = 24 * 95; // 95 jours
+        LocalDateTime baseDate = startPlanning.truncatedTo(ChronoUnit.HOURS);////Elle supprime les minutes, secondes, millisecondes, etc., de l'objet LocalDateTime, et ne garde que l'année, le mois, le jour et l'heure entière.
 
-        // Précalcul des heures valides avec leurs timestamps réels
-        List<Integer> heuresValides = new ArrayList<>();
+        // Précalcul des heures valides
+        List<Integer> heuresValides = new ArrayList<>(); /// des heures où il est possible de travailler
         Map<Integer, LocalDateTime> indexToDateTime = new HashMap<>();
 
         for (int h = 0; h <= horizonHours; h++) {
@@ -85,7 +83,6 @@ public class ChocosolverService {
             return Collections.emptyList();
         }
 
-        // Variables de début (indices dans heuresValides)
         IntVar[] startIndex = new IntVar[activities.size()];
         IntVar[] endIndex = new IntVar[activities.size()];
         IntVar[] durations = new IntVar[activities.size()];
@@ -95,7 +92,7 @@ public class ChocosolverService {
             int duration = activity.getDuration();
 
             if (duration > heuresValides.size()) {
-                System.out.println("Durée trop longue pour l'horizon pour l'activité " + activity.getName());
+                System.out.println("Durée trop longue pour l'activité " + activity.getName());
                 return Collections.emptyList();
             }
 
@@ -103,12 +100,10 @@ public class ChocosolverService {
             startIndex[i] = model.intVar("startIdx_" + activity.getName(), 0, maxStartIndex);
             endIndex[i] = model.intVar("endIdx_" + activity.getName(), duration, heuresValides.size());
             durations[i] = model.intVar(duration); // Durée fixe
-
-            // Relation entre start et end
             model.arithm(endIndex[i], "=", startIndex[i], "+", durations[i]).post();
         }
 
-        // Contraintes de dépendances (FS, SS, FF, SF)
+        // Contraintes de dépendances
         for (DependanceActivity dep : deps) {
             int targetIdx = activities.indexOf(dep.getTargetActivity());
             int predIdx = activities.indexOf(dep.getPredecessorActivity());
@@ -145,12 +140,11 @@ public class ChocosolverService {
             }
         }
 
-        // Calcul des disponibilités initiales en indices dans heuresValides
+        // Calcul des disponibilités initiales
         int[] maxEndEmployers = new int[employers.size()];
         int[] maxEndMachines = new int[machines.size()];
 
         for (int j = 0; j < employers.size(); j++) {
-            final int idx = j;
             maxEndEmployers[j] = employers.get(j).getActivitiesNotFinish().stream()
                     .mapToInt(a -> {
                         long hoursSinceStart = Duration.between(startPlanning, a.getPlannedEndDate()).toHours();
@@ -181,7 +175,6 @@ public class ChocosolverService {
         // Contraintes principales par activité
         for (int i = 0; i < activities.size(); i++) {
             Activity activity = activities.get(i);
-
             if (activity.getSkill() == null) {
                 for (int j = 0; j < employers.size(); j++) {
                     model.arithm(employerAssignment[i][j], "=", 0).post();
@@ -191,33 +184,36 @@ public class ChocosolverService {
                 }
                 continue;
             }
-
-            // Affectation des employés
+            /// Cette contrainte force que pour l’activité i, le nombre total d’employeurs affectés soit exactement égal au nombre requis
+            /// Elle réduit considérablement le nombre de solutions possibles dans le problème.
             model.sum(employerAssignment[i], "=", activity.getEmployersNumber()).post();
             boolean hasEmployer = false;
 
             for (int j = 0; j < employers.size(); j++) {
-                if (!employers.get(j).getSkills().stream()
+                if (!employers.get(j).getSkills().stream() //cherche si au moins une compétence a le même ID que celle demandée par l’activité.
                         .anyMatch(s -> s.getId().equals(activity.getSkill().getId()))) {
                     model.arithm(employerAssignment[i][j], "=", 0).post();
                 } else {
                     hasEmployer = true;
                     if (maxEndEmployers[j] >= 0) {
+                        //Si l’employeur j est affecté à l’activité i (employerAssignment[i][j] = 1),
+                        //alors le début de cette activité (startIndex[i]) doit être après ou égal à la fin
+                        // //max disponible pour cet employeur (maxEndEmployers[j]).
                         model.ifThen(
                                 model.arithm(employerAssignment[i][j], "=", 1),
-                                model.arithm(startIndex[i], ">=", maxEndEmployers[j])
+                                model.arithm(startIndex[i], ">=", maxEndEmployers[j])//on impose que l’activité commence après qu’il soit libre.
                         );
                     }
                 }
             }
-
+            //Il garantit qu’aucun employeur ne sera affecté à une activité quand aucun n’a la compétence requise,
+            // ce qui est une sécurité supplémentaire indispensable.
             if (!hasEmployer) {
                 for (int j = 0; j < employers.size(); j++) {
                     model.arithm(employerAssignment[i][j], "=", 0).post();
                 }
             }
 
-            // Affectation des machines
             if (activity.getCapabilityMachine() != null) {
                 model.sum(machineAssignment[i], "=", 1).post();
                 boolean hasMachine = false;
@@ -250,15 +246,17 @@ public class ChocosolverService {
         }
 
         // Contraintes de non-chevauchement
+        //L’objectif ici est de s’assurer qu’un employé n’a pas deux activités qui se chevauchent dans le temps
         for (int j = 0; j < employers.size(); j++) {
-            for (int i1 = 0; i1 < activities.size(); i1++) {
-                for (int i2 = i1 + 1; i2 < activities.size(); i2++) {
+            for (int i1 = 0; i1 < activities.size(); i1++) {//activité A
+                for (int i2 = i1 + 1; i2 < activities.size(); i2++) {/// activité B
                     model.ifThen(
-                            model.and(
-                                    model.arithm(employerAssignment[i1][j], "=", 1),
+                            model.and(                 ///model.and(cond1, cond2, ...)   Cela signifie "toutes les conditions cond1, cond2, ... doivent être vraies en même temps"   C’est un ET logique..//
+                                    model.arithm(employerAssignment[i1][j], "=", 1), /// / j represente emp dans la mat  i 1 et 2 act assi au meme emp
                                     model.arithm(employerAssignment[i2][j], "=", 1)
                             ),
-                            model.or(
+                            model.or(/// Cela signifie "au moins une des conditions cond1, cond2, ... doit être vraie" C’est un OU logique..
+
                                     model.arithm(endIndex[i1], "<=", startIndex[i2]),
                                     model.arithm(endIndex[i2], "<=", startIndex[i1])
                             )
@@ -266,7 +264,7 @@ public class ChocosolverService {
                 }
             }
         }
-
+        // Contraintes de non-chevauchement pour les machine
         for (int k = 0; k < machines.size(); k++) {
             for (int i1 = 0; i1 < activities.size(); i1++) {
                 for (int i2 = i1 + 1; i2 < activities.size(); i2++) {
@@ -290,36 +288,33 @@ public class ChocosolverService {
         model.setObjective(Model.MINIMIZE, makespan);
 
         // Résolution
-        System.out.println("Recherche de la meilleure solution...");
         Solver solver = model.getSolver();
-        solver.limitSolution(999999);
+        solver.limitSolution(999999999);
+
         List<Activity> results = new ArrayList<>();
         int bestMakespan = Integer.MAX_VALUE;
 
         while (solver.solve()) {
             if (makespan.getValue() >= bestMakespan) continue;
-
             bestMakespan = makespan.getValue();
             results.clear();
 
             for (int i = 0; i < activities.size(); i++) {
                 Activity activity = activities.get(i);
                 activity.setEmployees(new ArrayList<>());
-                AtomicBoolean hasEmployers = new AtomicBoolean(false);
+                AtomicBoolean hasEmployersBool = new AtomicBoolean(false);
                 AtomicBoolean hasMachine = new AtomicBoolean(false);
 
-                // Employés assignés
                 for (int j = 0; j < employers.size(); j++) {
                     if (employerAssignment[i][j].getValue() == 1) {
                         employerService.findById(employers.get(j).getId())
                                 .ifPresent(emp -> {
                                     activity.getEmployees().add(emp);
-                                    hasEmployers.set(true);
+                                    hasEmployersBool.set(true);
                                 });
                     }
                 }
 
-                // Machine assignée
                 for (int k = 0; k < machines.size(); k++) {
                     if (machineAssignment[i][k].getValue() == 1) {
                         machineService.findById(machines.get(k).getId())
@@ -330,9 +325,10 @@ public class ChocosolverService {
                     }
                 }
 
-                // Calcul des dates planifiées
                 int startIdx = startIndex[i].getValue();
-                int endIdx = startIdx + activity.getDuration();
+                int duration = activity.getDuration();
+
+                int endIdx = Math.min(startIdx + duration, heuresValides.size() - 1);
 
                 LocalDateTime startDate = indexToDateTime.get(heuresValides.get(startIdx));
                 LocalDateTime endDate = indexToDateTime.get(heuresValides.get(endIdx));

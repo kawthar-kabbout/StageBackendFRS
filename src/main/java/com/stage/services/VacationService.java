@@ -18,10 +18,25 @@ public class VacationService {
 
 
     public List<Vacation> findAll() {
-        return publicHolidaysRepository.findAll();
+        List<Vacation> vacations = new ArrayList<>();
+        List<Vacation> publicHolidays = publicHolidaysRepository.findAll();
+        for (Vacation vacation : publicHolidays) {
+            if (vacation.getArchived()==0)
+                vacations.add(vacation);
+        }
+
+        return vacations;
     }
    public Optional<Vacation> findById(Long id) {
-        return publicHolidaysRepository.findById(id);
+
+        Vacation vacation = publicHolidaysRepository.findById(id).orElse(null);
+        if (vacation!=null && vacation.getArchived()==0){
+            return Optional.of(vacation);
+
+        }
+        return Optional.ofNullable(vacation);
+
+
    }
     public Vacation save(Vacation publicHolidays) {
 

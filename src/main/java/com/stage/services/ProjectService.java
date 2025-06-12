@@ -31,12 +31,23 @@ public class ProjectService {
     }
 
     public Optional<Project> getProjectById(Long id) {
-        return projectRepository.findById(id);
+        Optional<Project> project = projectRepository.findById(id);
+        if (project.isPresent()&& project.get().getArchived()==0) {
+
+            return project;
+        }
+        else
+
+
+       return null;
     }
     public Project getProjectByName(String name) {
 
         if (projectRepository.findByName(name).isPresent()) {
-            return projectRepository.findByName(name).get();
+            if (projectRepository.findByName(name).get().getArchived()==0) {
+                return projectRepository.findByName(name).get();
+            }
+
         }return null;
 
     }
@@ -79,6 +90,8 @@ public class ProjectService {
             }
         }return true;
     }
+
+
 
 
     public ProjetDTO getProjetDTOPalnification(Project project) {

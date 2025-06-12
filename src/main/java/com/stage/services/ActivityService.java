@@ -8,6 +8,7 @@ import com.stage.persistans.enums.Statut;
 import com.stage.persistans.enums.ActivityType;
 import com.stage.repositories.ActivityRepository;
 import com.stage.repositories.DependanceActivityRepository;
+import com.stage.repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,8 @@ import java.util.*;
 public class ActivityService {
     private final ActivityRepository activityRepository;
     private final DependanceActivityRepository dependanceActivityRepository;
-   // private final DependanceActivityService dependanceActivityService;
+    private final ProjectRepository projectRepository;
+    // private final DependanceActivityService dependanceActivityService;
 
 
 
@@ -31,15 +33,21 @@ public class ActivityService {
 
 
 public List<Activity> getActivitiesByProjectId(Long projectId) {
-List<Activity> res = new ArrayList<>();
-        List <Activity> activities = activityRepository.findByProject_Id(projectId);
-        for (Activity activity : activities) {
-            if(activity.getArchived()==0)
-                res.add(activity);
-        }
+        Optional<Project>project=projectRepository.findById(projectId);
+        if (project.isPresent() && project.get().getArchived()==0) {
+
+                List<Activity> res = new ArrayList<>();
+                List <Activity> activities = activityRepository.findByProject_Id(projectId);
+                for (Activity activity : activities) {
+                    if(activity.getArchived()==0)
+                        res.add(activity);
+                }
 
 
-        return res;
+                return res;
+            }
+        return null;
+
 }
     // Create
     public Activity createActivity(Activity activity) {
@@ -64,11 +72,22 @@ return  activityRepository.countByProjectId(id);
 }
     // Read One by ID
     public Optional<Activity> getActivityById(Long id) {
-        return activityRepository.findById(id);
+        if (activityRepository.findById(id).isPresent() && activityRepository.findById(id).get().getArchived()==0) {
+
+                return activityRepository.findById(id);
+            }
+        return null;
+
+
     }
 
     public Optional<Activity> getActivityByName(String name) {
-        return activityRepository.findByName(name);
+        Optional<Activity> activity=activityRepository.findByName(name);
+        if (activity.isPresent()&& activity.get().getArchived()==0) {
+            return activity;
+        }
+
+        return null;
     }
 
     public Activity updateActivity(Activity modeleActivity) {
@@ -94,7 +113,7 @@ return  activityRepository.countByProjectId(id);
         if (activity != null) {
             {
 
-                activityRepository.save(activity);
+
                 List<DependanceActivity> deps=  dependanceActivityRepository.findByTargetActivity(activity);
                 List<DependanceActivity>depsProdese = dependanceActivityRepository.findByPredecessorActivity(activity);
 
@@ -106,7 +125,7 @@ return  activityRepository.countByProjectId(id);
                     dep.setArchived(1);
                 }
                 activity.setArchived(1);
-
+                activityRepository.save(activity);
             }
             return true;
         }
@@ -387,6 +406,31 @@ public void cloneActivityProjectRootTree(Project oldProject, Project newProject,
         return null;
     }
 
+    public Activity updateSatutToStart(Long id ){
+
+        Activity activity =activityRepository.findById(id).get();
+      if (activity!=null) {
+          activity.setStatut(Statut.Start);
+          updateActivity(activity);
+          activityRepository.save(activity);
+      }
+      return activity;
+    }
+
+
+    //update all date to null
+    public void  updateAllPlaningDatesTONull(List<Project> projects){
+        for (Project project : projects) {
+            List<Activity> activities = this.getActivitiesByProjectId(project.getId());
+            for (Activity activity : activities) {
+                activity.setPlannedStartDate(null);
+                activity.setPlannedEndDate(null);
+                activity.setEmployees(null);
+                activity.setMachine(null);
+                activityRepository.save(activity);
+            }
+        }
+    }
 
 
 }

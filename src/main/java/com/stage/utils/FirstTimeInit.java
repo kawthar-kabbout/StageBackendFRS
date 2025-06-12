@@ -70,8 +70,8 @@ public class FirstTimeInit implements CommandLineRunner {
             saturday.setDay(DayOfWeek.SATURDAY);
             saturday.setMorningStart(LocalTime.of(8, 0));
             saturday.setMorningEnd(LocalTime.of(12, 0));
-            saturday.setAfternoonStart(LocalTime.of(13, 0));
-            saturday.setAfternoonEnd(LocalTime.of(15, 0));
+            saturday.setAfternoonStart(LocalTime.of(12, 0));
+            saturday.setAfternoonEnd(LocalTime.of(14, 0));
             dailyList.add(saturday);
 
 // Étape 1 : Sauvegarder chaque DailyWorkTime individuellement
@@ -153,7 +153,7 @@ public class FirstTimeInit implements CommandLineRunner {
 
                 employer2 = new Employer();
                 employer2.setFirstName("Kabbout");
-                employer2.setLastName("Mohamed");
+                employer2.setLastName("Mohamed Ali");
                 employer2.setPhone("23416137");
                 employer2.setAddress("456 Elm St");
                 employer2.setGrade("Junior");
@@ -295,7 +295,7 @@ public class FirstTimeInit implements CommandLineRunner {
         if (modeleActivityRepository.count() == 0) {
             if (p1 != null && p2 != null && decoupe != null && pose != null) {
 
-                activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, c1, decoupe,4,2);
+                activity1 = new Activity("Activité 1", ActivityType.EXTERNE, p1, c1, decoupe,5,2);
                 activity19 = new Activity("Activité 19", ActivityType.EXTERNE, p1, c3, usinage,3,2);
 
                 activity8 =new Activity("Production", null,ActivityType.INTERNE,p2,0);

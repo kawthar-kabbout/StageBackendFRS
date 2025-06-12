@@ -217,4 +217,14 @@ public class ActivityController {
         return ResponseEntity.notFound().build();
     }
 
+    @PutMapping("/update-statut-start/{id})")
+    public ResponseEntity<Activity> updateSatutToStart(@PathVariable Long id) {
+
+        Activity activity=activityService.updateSatutToStart(id);
+        if (activity!=null) {
+            return ResponseEntity.ok(activity);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
 }

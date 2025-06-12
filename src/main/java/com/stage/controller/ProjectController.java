@@ -82,8 +82,21 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Project> updateProject(@PathVariable Long id, @RequestBody Project project) {
+    public  ResponseEntity<?> updateProject(@PathVariable Long id, @RequestBody Project project) {
         Optional<Project> savedProject = projectService.getProjectById(id);
+        if (savedProject.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Project projectWithSameName = projectService.getProjectByName(project.getName());
+        if (projectWithSameName != null && !projectWithSameName.getId().equals(id)) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Un projet avec ce nom existe déjà.");
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(response);
+        }
+
         if (savedProject.isPresent()) {
             savedProject.get().setName(project.getName());
             return ResponseEntity.ok(projectService.save(savedProject.get()));
@@ -110,8 +123,19 @@ public class ProjectController {
 
         Optional<Project> oldProject = projectService.getProjectById(id);
         if (oldProject.isEmpty()) {
+
+
+
             return ResponseEntity.notFound().build();
         }
+        if (projectService.getProjectByName(name) != null) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Un projet avec ce nom existe déjà.");
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(response);
+        }
+
 
         Project newProject = projectService.cloneProject(oldProject.get(),name,activitesFrontDTO);
         if (newProject == null) {
@@ -151,6 +175,8 @@ List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId(
             @PathVariable Long startPlanning,
             @RequestBody List<Project> projects) {
 
+
+
         Long startPlanning2 = startPlanning * 1000;
         LocalDateTime localDateTimePlannig = Instant.ofEpochMilli(startPlanning2)
                 .atZone(ZoneId.systemDefault())
@@ -161,6 +187,8 @@ List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId(
             return ResponseEntity.notFound().build();
         }
 
+
+
         // Validate employee and machine requirements
         List<String> validationErrors = employeeMachineValidator.employeeMachineValidator(projects);
 
@@ -168,7 +196,7 @@ List<Activity>newacts=activityService.getActivitiesByProjectId(newProject.getId(
         if (!validationErrors.isEmpty()) {
             return ResponseEntity.badRequest().body(validationErrors);
         }
-
+        activityService.updateAllPlaningDatesTONull(projects);
         // Solve the projects using the Choco solver
         List<Activity> result = chocosolverService.chocosolver(projects, localDateTimePlannig);
 
